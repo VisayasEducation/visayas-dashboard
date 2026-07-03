@@ -36,6 +36,32 @@ export type TimelineEvent = {
   data: any;
 };
 
+export type Brain = {
+  lead_id: string;
+  state: string;
+  identity: {
+    name: string | null;
+    student_name: string | null;
+    source: string | null;
+    campaign: string | null;
+    reply_language: string | null;
+    languages_used: string[];
+    city: string | null;
+    asking_for: string | null;
+    neet_status: string | null;
+    neet_score: number | null;
+    pcb: number | null;
+    pass_year: number | null;
+    concern: string | null;
+  };
+  learning: { items: { key: string; label: string; done: boolean }[]; next: string | null };
+  docs: { items: { key: string; label: string; done: boolean }[]; done: number; total: number };
+  payment: { due: number | null; paid: number; confirmed_at: string | null };
+  gate_count: number;
+  journey_days: number | null;
+  driven_by: string;
+};
+
 function headers(): HeadersInit {
   // login step: return { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
   return { "Content-Type": "application/json" };
@@ -58,6 +84,7 @@ export const api = {
   detail: (id: string) => req<{ lead: Lead }>(`/api/leads/${id}`),
   timeline: (id: string) =>
     req<{ lead_id: string; events: TimelineEvent[] }>(`/api/leads/${id}/timeline`),
+  brain: (id: string) => req<Brain>(`/api/leads/${id}/brain`),
   send: (id: string, text: string, sender_name: string) =>
     req<{ ok: boolean }>(`/api/leads/${id}/send`, {
       method: "POST",

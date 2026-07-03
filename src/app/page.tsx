@@ -1,8 +1,9 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { api, Board, Lead, TimelineEvent } from "@/lib/api";
+import { api, Board, Lead, TimelineEvent, Brain } from "@/lib/api";
 import ConversationList from "@/components/ConversationList";
 import ThreadPanel from "@/components/ThreadPanel";
+import BrainPanel from "@/components/BrainPanel";
 
 const ME = "Counsellor"; // login step replaces this with the signed-in user's name
 
@@ -12,6 +13,7 @@ export default function InboxPage() {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [currentLead, setCurrentLead] = useState<Lead | null>(null);
   const [events, setEvents] = useState<TimelineEvent[]>([]);
+  const [brain, setBrain] = useState<Brain | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [toast, setToast] = useState<string>("");
 
@@ -33,9 +35,14 @@ export default function InboxPage() {
   const openLead = useCallback(async (id: string) => {
     setCurrentId(id);
     try {
-      const [d, tl] = await Promise.all([api.detail(id), api.timeline(id)]);
+      const [d, tl, br] = await Promise.all([
+        api.detail(id),
+        api.timeline(id),
+        api.brain(id).catch(() => null),
+      ]);
       setCurrentLead(d.lead);
       setEvents(tl.events || []);
+      setBrain(br);
     } catch (e: any) {
       showToast("Couldn't load conversation");
     }
@@ -43,9 +50,13 @@ export default function InboxPage() {
 
   useEffect(() => {
     loadBoard();
-    const t = setInterval(loadBoard, 20000); // light polling; real-time later
+    // 5s polling for near-live updates; real-time push is a tracked later step.
+    const t = setInterval(() => {
+      loadBoard();
+      if (currentId) openLead(currentId); // refresh the open thread too
+    }, 5000);
     return () => clearInterval(t);
-  }, [loadBoard]);
+  }, [loadBoard, currentId, openLead]);
 
   async function toggleAI() {
     if (!currentLead) return;
@@ -98,7 +109,7 @@ export default function InboxPage() {
         <span className="me">RV</span>
       </div>
 
-      <div className="main">
+      <div className={`main ${currentLead ? "with-brain" : ""}`}>
         <ConversationList
           leads={leads}
           counts={board?.counts || {}}
@@ -129,6 +140,8 @@ export default function InboxPage() {
             />
           )}
         </div>
+
+        {currentLead && <BrainPanel brain={brain} />}
       </div>
 
       <div className={`toast ${toast ? "show" : ""}`}>{toast}</div>
