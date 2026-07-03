@@ -145,5 +145,10 @@ button,textarea,input{font-family:inherit}
 /* ---- inbound/outbound media in the thread ---- */
 .media-img{display:block;margin-bottom:6px}
 .media-img img{max-width:240px;max-height:280px;border-radius:10px;display:block;object-fit:cover;cursor:pointer;border:1px solid var(--hair)}
-.media-file{display:inline-flex;align-items:center;gap:6px;margin-bottom:6px;padding:8px 12px;background:var(--sunken);border:1px solid var(--hair);border-radius:8px;font-size:13px;color:var(--accent-ink);text-decoration:none}
-.media-file:hover{background:var(--accent-tint)}
+.media-audio{display:block;width:240px;margin-bottom:6px}
+.media-video{display:block;max-width:260px;max-height:300px;border-radius:10px;margin-bottom:6px;border:1px solid var(--hair)}
+.media-doc{display:flex;align-items:center;gap:10px;margin-bottom:6px;padding:10px 12px;background:var(--sunken);border:1px solid var(--hair);border-radius:10px;text-decoration:none;max-width:240px}
+.media-doc .ic{font-size:20px;flex:0 0 auto}
+.media-doc .nm{flex:1;font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.media-doc .op{font-size:11px;color:var(--accent);font-weight:600;flex:0 0 auto}
+.media-doc:hover{background:var(--accent-tint)}

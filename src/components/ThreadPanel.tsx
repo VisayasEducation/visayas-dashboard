@@ -58,17 +58,29 @@ export default function ThreadPanel({
     });
     if (ev.kind === "message") {
       const d = ev.data;
-      const media = d.media_url ? (
-        d.msg_type === "image" ? (
-          <a href={d.media_url} target="_blank" rel="noreferrer" className="media-img">
-            <img src={d.media_url} alt="sent media" />
-          </a>
-        ) : (
-          <a href={d.media_url} target="_blank" rel="noreferrer" className="media-file">
-            📎 {d.msg_type === "document" ? "Document" : d.msg_type === "audio" ? "Voice note" : "File"}
-          </a>
-        )
-      ) : null;
+      const fname = d.tags && d.tags.filename;
+      let media = null;
+      if (d.media_url) {
+        if (d.msg_type === "image") {
+          media = (
+            <a href={d.media_url} target="_blank" rel="noreferrer" className="media-img">
+              <img src={d.media_url} alt="sent media" />
+            </a>
+          );
+        } else if (d.msg_type === "audio") {
+          media = <audio className="media-audio" controls src={d.media_url} />;
+        } else if (d.msg_type === "video") {
+          media = <video className="media-video" controls src={d.media_url} />;
+        } else {
+          media = (
+            <a href={d.media_url} target="_blank" rel="noreferrer" className="media-doc">
+              <span className="ic">📄</span>
+              <span className="nm">{fname || "Document"}</span>
+              <span className="op">Open ↗</span>
+            </a>
+          );
+        }
+      }
       if (d.direction === "inbound") {
         rows.push(
           <div className="msg in" key={`m${i}`}>
