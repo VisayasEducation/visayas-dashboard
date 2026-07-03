@@ -58,9 +58,21 @@ export default function ThreadPanel({
     });
     if (ev.kind === "message") {
       const d = ev.data;
+      const media = d.media_url ? (
+        d.msg_type === "image" ? (
+          <a href={d.media_url} target="_blank" rel="noreferrer" className="media-img">
+            <img src={d.media_url} alt="sent media" />
+          </a>
+        ) : (
+          <a href={d.media_url} target="_blank" rel="noreferrer" className="media-file">
+            📎 {d.msg_type === "document" ? "Document" : d.msg_type === "audio" ? "Voice note" : "File"}
+          </a>
+        )
+      ) : null;
       if (d.direction === "inbound") {
         rows.push(
           <div className="msg in" key={`m${i}`}>
+            {media}
             {d.body}
             <div className="tm">{t}</div>
           </div>
@@ -70,6 +82,7 @@ export default function ThreadPanel({
         rows.push(
           <div className={`msg out ${human ? "human" : ""}`} key={`m${i}`}>
             <div className="attr">{human || "Maya"}</div>
+            {media}
             {d.body}
             <div className="tm">{t} ✓✓</div>
           </div>

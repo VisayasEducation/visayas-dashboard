@@ -141,3 +141,9 @@ button,textarea,input{font-family:inherit}
 .bi-play b{color:var(--ink)}
 .bi-gate{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2)}
 .bi-gate .gc{width:28px;height:28px;border-radius:8px;background:var(--accent-tint);border:1px solid var(--accent-border);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-size:13px}
+
+/* ---- inbound/outbound media in the thread ---- */
+.media-img{display:block;margin-bottom:6px}
+.media-img img{max-width:240px;max-height:280px;border-radius:10px;display:block;object-fit:cover;cursor:pointer;border:1px solid var(--hair)}
+.media-file{display:inline-flex;align-items:center;gap:6px;margin-bottom:6px;padding:8px 12px;background:var(--sunken);border:1px solid var(--hair);border-radius:8px;font-size:13px;color:var(--accent-ink);text-decoration:none}
+.media-file:hover{background:var(--accent-tint)}
