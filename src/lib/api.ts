@@ -1,0 +1,71 @@
+// src/lib/api.ts — the one place that talks to the backend.
+// When login lands, add the auth header in the `headers` below — nothing else changes.
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "";
+export const BUSINESS_ID = process.env.NEXT_PUBLIC_BUSINESS_ID || "";
+
+export type Lead = {
+  id: string;
+  name: string | null;
+  phone: string | null;
+  state: string | null;
+  concern: string | null;
+  driven_by: "maya" | "human";
+  gate_count: number;
+  docs_done: number;
+  docs_total: number;
+  city?: string | null;
+  source?: string | null;
+  last_inbound_at: string | null;
+  window_open: boolean;
+  window_seconds_left: number;
+  updated_at: string;
+  created_at: string;
+};
+
+export type Board = {
+  business_id: string;
+  counts: Record<string, number>;
+  total: number;
+  board: Record<string, Lead[]>;
+};
+
+export type TimelineEvent = {
+  kind: "message" | "event";
+  ts: string;
+  data: any;
+};
+
+function headers(): HeadersInit {
+  // login step: return { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+  return { "Content-Type": "application/json" };
+}
+
+async function req<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, { ...init, headers: headers() });
+  if (!res.ok) {
+    let detail = await res.text();
+    try {
+      detail = JSON.parse(detail).detail || detail;
+    } catch {}
+    throw new Error(detail || `Request failed (${res.status})`);
+  }
+  return res.json();
+}
+
+export const api = {
+  board: () => req<Board>(`/api/leads?business_id=${BUSINESS_ID}`),
+  detail: (id: string) => req<{ lead: Lead }>(`/api/leads/${id}`),
+  timeline: (id: string) =>
+    req<{ lead_id: string; events: TimelineEvent[] }>(`/api/leads/${id}/timeline`),
+  send: (id: string, text: string, sender_name: string) =>
+    req<{ ok: boolean }>(`/api/leads/${id}/send`, {
+      method: "POST",
+      body: JSON.stringify({ text, sender_name }),
+    }),
+  takeover: (id: string, driver: "maya" | "human", by: string) =>
+    req<{ ok: boolean; driven_by: string }>(`/api/leads/${id}/takeover`, {
+      method: "POST",
+      body: JSON.stringify({ driver, by }),
+    }),
+};
