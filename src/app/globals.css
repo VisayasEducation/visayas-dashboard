@@ -152,3 +152,15 @@ button,textarea,input{font-family:inherit}
 .media-doc .nm{flex:1;font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .media-doc .op{font-size:11px;color:var(--accent);font-weight:600;flex:0 0 auto}
 .media-doc:hover{background:var(--accent-tint)}
+/* type chip on a document / link card */
+.media-doc .chip{flex:0 0 auto;min-width:36px;text-align:center;font-size:10px;font-weight:700;letter-spacing:.02em;padding:4px 6px;border-radius:6px;background:var(--sunken);color:var(--ink-3);border:1px solid var(--hair)}
+.media-doc .chip.pdf{background:var(--rose-tint);color:var(--rose);border-color:var(--rose-border)}
+.media-doc .chip.link{background:var(--accent-tint);color:var(--accent);border-color:var(--accent-border)}
+/* youtube / link card: thumbnail on top, title below (like WhatsApp) */
+.media-yt{display:block;max-width:260px;margin-bottom:6px;border:1px solid var(--hair);border-radius:12px;overflow:hidden;text-decoration:none;background:var(--surface)}
+.media-yt img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.media-yt .yt-meta{padding:8px 11px}
+.media-yt .yt-title{font-size:13px;font-weight:600;color:var(--ink);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.media-yt .yt-host{font-size:11px;color:var(--ink-3);margin-top:3px}
+.media-yt .yt-play{color:var(--rose)}
+.media-yt:hover{box-shadow:var(--sh-2)}

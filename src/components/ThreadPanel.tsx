@@ -3,6 +3,79 @@ import { useEffect, useRef, useState } from "react";
 import { Lead, TimelineEvent } from "@/lib/api";
 import { initials, color } from "@/lib/ui";
 
+// Pull a YouTube video id out of watch?v=, youtu.be/, or /shorts/ URLs.
+function ytId(url: string): string | null {
+  const m = url.match(/(?:v=|youtu\.be\/|shorts\/)([A-Za-z0-9_-]{6,})/);
+  return m ? m[1] : null;
+}
+
+// Best-effort file extension (for the little type chip on a document card).
+function fileExt(url: string, fallback = "FILE"): string {
+  try {
+    const clean = url.split("?")[0].split("#")[0];
+    const ext = clean.substring(clean.lastIndexOf(".") + 1).toUpperCase();
+    return clean.includes(".") && ext.length >= 1 && ext.length <= 4 ? ext : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+// One media item, rendered like WhatsApp: image, audio, video, a YouTube
+// thumbnail card, a generic link card, or a document card. Display only —
+// the backend already logs every item; this just renders it richly.
+function MediaBlock({ d }: { d: any }) {
+  const url: string | undefined = d.media_url;
+  if (!url) return null;
+
+  // link (usually YouTube) -> thumbnail card, else a generic link card
+  if (d.msg_type === "text_link") {
+    const id = ytId(url);
+    const caption = d.tags?.caption;
+    let host = "link";
+    try { host = new URL(url).hostname.replace(/^www\./, ""); } catch {}
+    if (id) {
+      return (
+        <a href={url} target="_blank" rel="noreferrer" className="media-yt">
+          <img src={`https://img.youtube.com/vi/${id}/hqdefault.jpg`} alt="" />
+          <div className="yt-meta">
+            <div className="yt-title">{caption || "Watch video"}</div>
+            <div className="yt-host"><span className="yt-play">▶</span> youtube.com</div>
+          </div>
+        </a>
+      );
+    }
+    return (
+      <a href={url} target="_blank" rel="noreferrer" className="media-doc">
+        <span className="chip link">↗</span>
+        <span className="nm">{caption || host}</span>
+        <span className="op">Open ↗</span>
+      </a>
+    );
+  }
+
+  if (d.msg_type === "image")
+    return (
+      <a href={url} target="_blank" rel="noreferrer" className="media-img">
+        <img src={url} alt="sent media" />
+      </a>
+    );
+  if (d.msg_type === "audio")
+    return <audio className="media-audio" controls src={url} />;
+  if (d.msg_type === "video")
+    return <video className="media-video" controls src={url} />;
+
+  // document / pdf card -- red type chip + filename + Open
+  const name = d.tags?.caption || d.tags?.filename || "Document";
+  const ext = fileExt(url, "FILE");
+  return (
+    <a href={url} target="_blank" rel="noreferrer" className="media-doc">
+      <span className={`chip ${ext === "PDF" ? "pdf" : ""}`}>{ext}</span>
+      <span className="nm">{name}</span>
+      <span className="op">Open ↗</span>
+    </a>
+  );
+}
+
 export default function ThreadPanel({
   lead,
   events,
@@ -70,29 +143,7 @@ export default function ThreadPanel({
     });
     if (ev.kind === "message") {
       const d = ev.data;
-      const fname = d.tags && d.tags.filename;
-      let media = null;
-      if (d.media_url) {
-        if (d.msg_type === "image") {
-          media = (
-            <a href={d.media_url} target="_blank" rel="noreferrer" className="media-img">
-              <img src={d.media_url} alt="sent media" />
-            </a>
-          );
-        } else if (d.msg_type === "audio") {
-          media = <audio className="media-audio" controls src={d.media_url} />;
-        } else if (d.msg_type === "video") {
-          media = <video className="media-video" controls src={d.media_url} />;
-        } else {
-          media = (
-            <a href={d.media_url} target="_blank" rel="noreferrer" className="media-doc">
-              <span className="ic">📄</span>
-              <span className="nm">{fname || "Document"}</span>
-              <span className="op">Open ↗</span>
-            </a>
-          );
-        }
-      }
+      const media = d.media_url ? <MediaBlock d={d} /> : null;
       if (d.direction === "inbound") {
         rows.push(
           <div className="msg in" key={`m${i}`}>
