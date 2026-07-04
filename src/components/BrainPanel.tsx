@@ -1,12 +1,34 @@
 "use client";
 import { Brain } from "@/lib/api";
 
-function Progress({ done, total }: { done: number; total: number }) {
+const STAGE_RAIL: [string, string][] = [
+  ["new", "New"], ["engaged", "Engaged"], ["eligible", "Eligible"],
+  ["docs", "Docs"], ["noa_requested", "NOA"], ["payment_due", "Payment"], ["converted", "Done"],
+];
+const STAGE_DESC: Record<string, string> = {
+  new: "Just reached out. Maya is greeting and learning what they need.",
+  engaged: "In conversation. Maya is helping and gathering the eligibility picture.",
+  eligible: "They can proceed. Maya is moving toward document collection.",
+  docs: "Collecting the documents for the Note of Acceptance.",
+  noa_requested: "Documents in — the request has gone to the college. Awaiting the NOA.",
+  payment_due: "NOA ready. The booking payment secures the seat.",
+  converted: "Paid and joined. A counsellor now handles visa, travel and enrolment.",
+  closed: "This conversation is closed.",
+};
+
+function StageRail({ state }: { state: string }) {
+  const idx = STAGE_RAIL.findIndex(([k]) => k === state);
   return (
-    <div className="bi-prog">
-      {Array.from({ length: total }).map((_, i) => (
-        <span key={i} className={i < done ? "on" : ""} />
-      ))}
+    <div className="bi-rail">
+      {STAGE_RAIL.map(([k, label], i) => {
+        const cls = i < idx ? "done" : i === idx ? "cur" : "";
+        return (
+          <div key={k} className={`rn ${cls}`}>
+            <span className="bead">{i < idx ? "✓" : ""}</span>
+            <span className="cap">{label}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -20,73 +42,76 @@ function Row({ k, v, muted }: { k: string; v: React.ReactNode; muted?: boolean }
   );
 }
 
-export default function BrainPanel({ brain }: { brain: Brain | null }) {
+export default function BrainPanel({
+  brain, open = false, onClose,
+}: { brain: Brain | null; open?: boolean; onClose?: () => void }) {
   if (!brain) return <div className="bi-empty">Select a conversation</div>;
 
   const { identity: id, state } = brain;
-  const isNew = state === "new" || state === "engaged" || state === "eligible";
   const isDocs = state === "docs" || state === "noa_requested";
   const isPayment = state === "payment_due";
   const isConverted = state === "converted";
+  const showLearning = state === "new" || state === "engaged" || state === "eligible";
+
+  const isParent = !!id.asking_for && id.asking_for !== "self";
+  const decides = id.asking_for === "self" ? "Student"
+    : id.asking_for ? `Parent · for ${id.asking_for}` : null;
 
   return (
-    <div className="bi">
+    <div className={`bi ${open ? "open" : ""}`}>
       <div className="bi-head">
         <span className="bi-title">Lead intelligence</span>
         <span className="bi-state">state · {state}</span>
+        {onClose && <button className="bi-close" onClick={onClose} aria-label="Close">✕</button>}
       </div>
 
-      {/* ---- identity card (always shown) ---- */}
+      {/* stage rail */}
       <div className="bi-card">
-        <Progress
-          done={brain.learning.items.filter((i) => i.done).length}
-          total={brain.learning.items.length}
+        <div className="bi-sub"><span>Stage</span></div>
+        <StageRail state={state} />
+        <div className="bi-stagedesc">{STAGE_DESC[state] || ""}</div>
+      </div>
+
+      {/* identity */}
+      <div className="bi-card">
+        <Row
+          k="Name"
+          v={<>{id.student_name || id.name || <span className="skel" />}{isParent && <span className="who-badge">parent</span>}</>}
+          muted={!id.name && !id.student_name}
         />
-        <Row k="Name" v={id.student_name || id.name || <span className="skel" />} muted={!id.name && !id.student_name} />
         <Row k="Source" v={id.campaign ? `${id.source} · ${id.campaign}` : id.source || "whatsapp"} />
         <Row
           k="Language"
-          v={
-            id.reply_language ? (
-              <>
-                <b>{id.reply_language}</b>{" "}
-                <span className="det">● detected</span>
-                {id.languages_used.length > 1 && (
-                  <span className="langs"> ({id.languages_used.join(", ")})</span>
-                )}
-              </>
-            ) : (
-              "listening…"
-            )
-          }
+          v={id.reply_language ? (
+            <>
+              <b>{id.reply_language}</b>{" "}<span className="det">● detected</span>
+              {id.languages_used.length > 1 && <span className="langs"> ({id.languages_used.join(", ")})</span>}
+            </>
+          ) : "listening…"}
           muted={!id.reply_language}
         />
-        {(id.neet_score != null || isDocs || isPayment) && (
-          <Row
-            k="NEET / PCB"
-            v={
-              id.neet_score != null || id.pcb != null
-                ? `${id.neet_score ?? "—"} · ${id.pcb != null ? id.pcb + "%" : "—"}`
-                : "not shared yet"
-            }
-            muted={id.neet_score == null && id.pcb == null}
-          />
+        {(id.neet_score != null || id.pcb != null) && (
+          <Row k="NEET / PCB" v={`${id.neet_score ?? "—"} · ${id.pcb != null ? id.pcb + "%" : "—"}`} />
         )}
         {brain.journey_days != null && brain.journey_days > 0 && (
           <Row k="Journey age" v={`${brain.journey_days} days`} />
         )}
-        {id.asking_for && (
-          <Row k="Decides" v={id.asking_for === "self" ? "Student" : id.asking_for} />
-        )}
+        {decides && <Row k="Decides" v={decides} />}
         <Row
           k="Signals"
-          v={id.concern ? <span className="sig">{id.concern}</span> : "listening…"}
-          muted={!id.concern}
+          v={id.concerns && id.concerns.length ? (
+            <span className="sigs">
+              {id.concerns.map((c) => (
+                <span key={c} className={`sig ${c === id.concern ? "primary" : ""}`}>{c}</span>
+              ))}
+            </span>
+          ) : "listening…"}
+          muted={!(id.concerns && id.concerns.length)}
         />
       </div>
 
-      {/* ---- NEW: the learning checklist ---- */}
-      {isNew && (
+      {/* what Maya learned (with values) */}
+      {showLearning && (
         <div className="bi-card">
           <div className="bi-sub">
             <span>Maya is learning</span>
@@ -97,7 +122,11 @@ export default function BrainPanel({ brain }: { brain: Brain | null }) {
             return (
               <div key={it.key} className={`bi-check ${it.done ? "done" : ""} ${asking ? "asking" : ""}`}>
                 <span className="dot">{it.done ? "✓" : ""}</span>
-                <span className="lbl">{it.label}</span>
+                <span className="lbl">
+                  {it.label}
+                  {it.value && <span className="val">{it.value}</span>}
+                  {asking && !it.value && <span className="val muted">Asking now…</span>}
+                </span>
                 {asking && <span className="chip">ASKING NOW</span>}
               </div>
             );
@@ -105,14 +134,12 @@ export default function BrainPanel({ brain }: { brain: Brain | null }) {
         </div>
       )}
 
-      {/* ---- DOCS/PAYMENT/CONVERTED: the document checklist ---- */}
+      {/* documents */}
       {(isDocs || isPayment || isConverted) && (
         <div className="bi-card">
           <div className="bi-sub">
             <span>Documents</span>
-            <span className="bi-hint">
-              {brain.docs.done} of {brain.docs.total}
-            </span>
+            <span className="bi-hint">{brain.docs.done} of {brain.docs.total}</span>
           </div>
           {brain.docs.items.map((d) => (
             <div key={d.key} className={`bi-check ${d.done ? "done" : ""}`}>
@@ -123,7 +150,7 @@ export default function BrainPanel({ brain }: { brain: Brain | null }) {
         </div>
       )}
 
-      {/* ---- PAYMENT / CONVERTED: the payment card ---- */}
+      {/* payment / converted */}
       {(isPayment || isConverted) && (
         <div className="bi-card amber">
           <div className="bi-sub">
@@ -146,28 +173,7 @@ export default function BrainPanel({ brain }: { brain: Brain | null }) {
         </div>
       )}
 
-      {/* ---- CONVERTED: handover ---- */}
-      {isConverted && (
-        <div className="bi-card">
-          <div className="bi-sub">
-            <span>Handover brief</span>
-            <span className="bi-hint">the relay</span>
-          </div>
-          <div className="bi-note">Generated at handover — the handoff step builds this.</div>
-        </div>
-      )}
-
-      {/* ---- Playbook (NEW) ---- */}
-      {isNew && (
-        <div className="bi-card muted-card">
-          <div className="bi-sub"><span>Playbook · first 10 minutes</span></div>
-          <div className="bi-play">
-            <b>One question at a time. No firehose.</b> Maya feeds the right artifact when the concern shows itself.
-          </div>
-        </div>
-      )}
-
-      {/* ---- Gate (always) ---- */}
+      {/* gate */}
       <div className="bi-card">
         <div className="bi-sub">
           <span>Gate</span>

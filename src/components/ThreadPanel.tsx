@@ -83,6 +83,7 @@ export default function ThreadPanel({
   onToggleAI,
   onSend,
   onBack,
+  onOpenBrain,
 }: {
   lead: Lead;
   events: TimelineEvent[];
@@ -90,6 +91,7 @@ export default function ThreadPanel({
   onToggleAI: () => void;
   onSend: (text: string) => Promise<void>;
   onBack: () => void;
+  onOpenBrain: () => void;
 }) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -205,6 +207,7 @@ export default function ThreadPanel({
           <span className="sw" />
           <span className="state">{driving ? "OFF · human" : "ON · Maya"}</span>
         </div>
+        <button className="thread-lead" onClick={onOpenBrain}>ⓘ Lead</button>
       </div>
 
       <div className="thread" ref={threadRef} onScroll={handleScroll}>

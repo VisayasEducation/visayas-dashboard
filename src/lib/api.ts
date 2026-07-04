@@ -53,8 +53,9 @@ export type Brain = {
     pcb: number | null;
     pass_year: number | null;
     concern: string | null;
+    concerns: string[];
   };
-  learning: { items: { key: string; label: string; done: boolean }[]; next: string | null };
+  learning: { items: { key: string; label: string; done: boolean; value: string | null }[]; next: string | null };
   docs: { items: { key: string; label: string; done: boolean }[]; done: number; total: number };
   payment: { due: number | null; paid: number; confirmed_at: string | null };
   gate_count: number;

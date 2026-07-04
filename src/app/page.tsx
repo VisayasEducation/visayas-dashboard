@@ -14,6 +14,7 @@ export default function InboxPage() {
   const [currentLead, setCurrentLead] = useState<Lead | null>(null);
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [brain, setBrain] = useState<Brain | null>(null);
+  const [brainOpen, setBrainOpen] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [toast, setToast] = useState<string>("");
 
@@ -137,12 +138,13 @@ export default function InboxPage() {
               me={ME}
               onToggleAI={toggleAI}
               onSend={sendMsg}
-              onBack={() => { setCurrentId(null); setCurrentLead(null); }}
+              onBack={() => { setCurrentId(null); setCurrentLead(null); setBrainOpen(false); }}
+              onOpenBrain={() => setBrainOpen(true)}
             />
           )}
         </div>
 
-        {currentLead && <BrainPanel brain={brain} />}
+        {currentLead && <BrainPanel brain={brain} open={brainOpen} onClose={() => setBrainOpen(false)} />}
       </div>
 
       <div className={`toast ${toast ? "show" : ""}`}>{toast}</div>
