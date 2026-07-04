@@ -19,12 +19,24 @@ export default function ThreadPanel({
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const threadRef = useRef<HTMLDivElement>(null);
+  const atBottomRef = useRef(true);   // are we currently near the bottom?
 
   const driving = lead.driven_by === "human";
   const winOpen = lead.window_open;
 
+  // remember whether the user is near the bottom, updated as they scroll
+  function handleScroll() {
+    const el = threadRef.current;
+    if (!el) return;
+    atBottomRef.current =
+      el.scrollHeight - el.scrollTop - el.clientHeight < 80; // 80px tolerance
+  }
+
+  // only jump to the bottom on new messages if they were already at the bottom
   useEffect(() => {
-    if (threadRef.current) threadRef.current.scrollTop = threadRef.current.scrollHeight;
+    if (atBottomRef.current && threadRef.current) {
+      threadRef.current.scrollTop = threadRef.current.scrollHeight;
+    }
   }, [events]);
 
   async function submit() {
@@ -136,7 +148,7 @@ export default function ThreadPanel({
         </div>
       </div>
 
-      <div className="thread" ref={threadRef}>
+      <div className="thread" ref={threadRef} onScroll={handleScroll}>
         {rows}
       </div>
 
