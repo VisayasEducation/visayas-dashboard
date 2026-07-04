@@ -7,7 +7,8 @@ const FILTERS: { key: string | null; label: string }[] = [
   { key: "new", label: "New" },
   { key: "engaged", label: "Engaged" },
   { key: "eligible", label: "Eligible" },
-  { key: "docs_loa", label: "Docs" },
+  { key: "docs", label: "Docs" },
+  { key: "noa_requested", label: "NOA" },
   { key: "payment_due", label: "Payment" },
   { key: "converted", label: "Converted" },
 ];

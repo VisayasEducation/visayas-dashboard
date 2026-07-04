@@ -165,11 +165,16 @@ export default function ThreadPanel({
       }
     } else {
       const d = ev.data || {};
+      // event detail can arrive as a nested object OR a JSON string — handle both
+      let det: any = d.data;
+      if (typeof det === "string") { try { det = JSON.parse(det); } catch { det = {}; } }
+      det = det || {};
+      const to = det.to ?? d.to;
       const label =
         d.type === "driver_changed"
-          ? `switched to ${d.data?.to === "human" ? "human" : "Maya"}`
+          ? `switched to ${to === "human" ? "human" : "Maya"}`
           : d.type === "stage_moved"
-          ? `stage → ${d.data?.to}`
+          ? `stage → ${to || "?"}`
           : d.type;
       rows.push(<div className="evline" key={`e${i}`}>— {label} —</div>);
     }
