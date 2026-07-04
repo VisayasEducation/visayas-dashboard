@@ -82,12 +82,14 @@ export default function ThreadPanel({
   me,
   onToggleAI,
   onSend,
+  onBack,
 }: {
   lead: Lead;
   events: TimelineEvent[];
   me: string;
   onToggleAI: () => void;
   onSend: (text: string) => Promise<void>;
+  onBack: () => void;
 }) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -184,6 +186,7 @@ export default function ThreadPanel({
   return (
     <>
       <div className="thread-head">
+        <button className="thread-back" onClick={onBack} aria-label="Back to list">←</button>
         <div className="fp" style={{ background: color(lead.id) }}>
           {initials(lead.name, lead.phone)}
         </div>

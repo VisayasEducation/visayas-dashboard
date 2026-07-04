@@ -137,6 +137,7 @@ export default function InboxPage() {
               me={ME}
               onToggleAI={toggleAI}
               onSend={sendMsg}
+              onBack={() => { setCurrentId(null); setCurrentLead(null); }}
             />
           )}
         </div>

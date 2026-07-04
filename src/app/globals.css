@@ -164,3 +164,23 @@ button,textarea,input{font-family:inherit}
 .media-yt .yt-host{font-size:11px;color:var(--ink-3);margin-top:3px}
 .media-yt .yt-play{color:var(--rose)}
 .media-yt:hover{box-shadow:var(--sh-2)}
+/* ---- mobile: one panel at a time ---- */
+.thread-back{display:none}
+@media (max-width:860px){
+  .main{grid-template-columns:1fr}
+  .main.with-brain{grid-template-columns:1fr}
+  /* no chat open -> show only the conversation list */
+  .main:not(.with-brain) .thread-wrap{display:none}
+  /* chat open -> show only the chat (list + intelligence panel hidden) */
+  .main.with-brain .list{display:none}
+  .main.with-brain .bi{display:none}
+  .thread-head{padding:11px 12px}
+  .thread{padding:16px 12px}
+  .msg{max-width:86%}
+  .filters{gap:5px;padding:9px 14px}
+  .list-head{padding:14px 14px 8px}
+  .row{padding:12px 14px}
+  .thread-back{display:inline-grid;place-items:center;width:32px;height:32px;flex:0 0 auto;
+    border:1px solid var(--hair);background:var(--surface);border-radius:8px;cursor:pointer;
+    font-size:17px;color:var(--ink-2);margin-right:2px}
+}

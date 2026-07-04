@@ -25,7 +25,7 @@ export default function BrainPanel({ brain }: { brain: Brain | null }) {
 
   const { identity: id, state } = brain;
   const isNew = state === "new" || state === "engaged" || state === "eligible";
-  const isDocs = state === "docs_loa";
+  const isDocs = state === "docs" || state === "noa_requested";
   const isPayment = state === "payment_due";
   const isConverted = state === "converted";
 
@@ -114,16 +114,12 @@ export default function BrainPanel({ brain }: { brain: Brain | null }) {
               {brain.docs.done} of {brain.docs.total}
             </span>
           </div>
-          {brain.docs.done === 0 ? (
-            <div className="bi-note">Not collected yet — inbound file storage is the next step.</div>
-          ) : (
-            brain.docs.items.map((d) => (
-              <div key={d.key} className={`bi-check ${d.done ? "done" : ""}`}>
-                <span className="dot">{d.done ? "✓" : ""}</span>
-                <span className="lbl">{d.label}</span>
-              </div>
-            ))
-          )}
+          {brain.docs.items.map((d) => (
+            <div key={d.key} className={`bi-check ${d.done ? "done" : ""}`}>
+              <span className="dot">{d.done ? "✓" : ""}</span>
+              <span className="lbl">{d.label}</span>
+            </div>
+          ))}
         </div>
       )}
 
