@@ -28,7 +28,7 @@ function MediaBlock({ d }: { d: any }) {
   if (!url) return null;
 
   // link (usually YouTube) -> thumbnail card, else a generic link card
-  if (d.msg_type === "text_link") {
+  if (d.msg_type === "text_link" || d.msg_type === "youtube_link") {
     const id = ytId(url);
     const caption = d.tags?.caption;
     let host = "link";
