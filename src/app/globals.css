@@ -297,3 +297,24 @@ button,textarea,input{font-family:inherit}
   .mtabbar button.on{color:var(--accent,#0c6e46)}
   .app{padding-bottom:62px}                            /* keep content clear of the bar */
 }
+/* ---- Results: insight cards (.r3) ---- */
+.r3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.r3 .ins{padding:20px 22px;background:var(--surface);border:1px solid var(--hair);border-radius:16px;box-shadow:var(--sh-1)}
+.r3 .ins.amber{background:var(--amber-tint);border-color:var(--amber-border)}
+.r3 .ins .big{font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.r3 .ins .big.g{color:var(--accent-ink)}
+.r3 .ins p{font-size:13px;color:var(--ink-2);margin-top:8px;line-height:1.5}
+.stuck{display:inline-flex;align-items:center;gap:7px;margin-top:14px;background:var(--ink);color:#fff;
+  font-size:13px;font-weight:600;border:none;border-radius:10px;padding:9px 14px;cursor:pointer;font-family:inherit}
+.stuck b{background:rgba(255,255,255,.16);padding:1px 7px;border-radius:5px}
+.stuck:hover{opacity:.9}
+
+/* ---- Results: custom date row (.r-custom) ---- */
+.r-custom{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.r-custom input[type=date]{font-family:inherit;font-size:13px;color:var(--ink);background:var(--surface);
+  border:1px solid var(--hair);border-radius:10px;padding:8px 11px}
+.r-custom span{color:var(--ink-3)}
+.r-apply{font-family:inherit;font-size:13px;font-weight:600;color:#fff;background:var(--accent);
+  border:none;border-radius:10px;padding:9px 16px;cursor:pointer}
+.r-apply:disabled{background:var(--ink-4);cursor:not-allowed}
+.r-apply:not(:disabled):hover{background:var(--accent-ink)}

@@ -83,8 +83,8 @@ export default function ResultsScreen({ onStage }: { onStage: (state: string) =>
             See the <b>{ins.stuck || 0}</b> stuck leads ↗</button>
         </div>
         <div className="r-card ins">
-          <div className="big">{ins.days_to_pay != null ? `${ins.days_to_pay} days` : "—"}</div>
-          <p>Median first message → payment.</p>
+          <div className="big">{ins.days_to_pay != null ? `${ins.days_to_pay} days` : "Not yet"}</div>
+          <p>{ins.days_to_pay != null ? "Median first message → payment." : "No leads have reached payment yet."}</p>
         </div>
         <div className="r-card ins">
           <div className="big g">{ins.maya_pct || 0}% Maya-driven</div>
