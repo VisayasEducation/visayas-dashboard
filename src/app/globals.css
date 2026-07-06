@@ -286,3 +286,14 @@ button,textarea,input{font-family:inherit}
 .money.conf{background:var(--accent-soft,#e9f4ee);border-color:var(--accent-line,#c6e2d3)}.money.conf .a{color:var(--accent-ink,#0a5637)}
 .money.mot{background:#fbf3e4;border-color:#ecd9a8}.money.mot .a{color:#9a6700}
 @media(max-width:860px){.r-mg{grid-template-columns:1fr}.results{padding:20px 16px 80px}.bars{height:150px}.bar{font-size:14px}}
+/* mobile bottom tab bar */
+.mtabbar{display:none}
+@media(max-width:860px){
+  .navtab,.nav-div,.biz-label{display:none}          /* hide top tabs on mobile */
+  .mtabbar{display:flex;position:fixed;bottom:0;left:0;right:0;height:62px;background:#fff;
+    border-top:1px solid var(--hair,#e7ebe7);justify-content:space-around;align-items:center;z-index:60}
+  .mtabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;
+    font-weight:600;color:var(--ink-3,#8a958e);border:none;background:none;cursor:pointer;font-family:inherit}
+  .mtabbar button.on{color:var(--accent,#0c6e46)}
+  .app{padding-bottom:62px}                            /* keep content clear of the bar */
+}

@@ -162,6 +162,17 @@ export default function InboxPage() {
       )}
 
       <div className={`toast ${toast ? "show" : ""}`}>{toast}</div>
+
+      <nav className="mtabbar">
+        <button className={screen === "chats" ? "on" : ""} onClick={() => setScreen("chats")}>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Chats</button>
+        <button className={screen === "results" ? "on" : ""} onClick={() => setScreen("results")}>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="12" y="6" width="3" height="11"/><rect x="17" y="13" width="3" height="4"/></svg>
+          Results</button>
+      </nav>
     </div>
   );
 }

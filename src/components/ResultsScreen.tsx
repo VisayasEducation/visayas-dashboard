@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
 const ORDER: [string, string][] = [
@@ -8,14 +8,25 @@ const ORDER: [string, string][] = [
 ];
 
 export default function ResultsScreen({ onStage }: { onStage: (state: string) => void }) {
-  const [data, setData] = useState<Awaited<ReturnType<typeof api.analytics>> | null>(null);
-  useEffect(() => { api.analytics().then(setData).catch(() => {}); }, []);
+  const [data, setData] = useState<any>(null);
+  const [days, setDays] = useState(90);
+  const [showCustom, setShowCustom] = useState(false);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+
+  const load = useCallback((d: number, f?: string, t?: string) => {
+    api.analytics(d, f, t).then(setData).catch(() => {});
+  }, []);
+  useEffect(() => { load(days); }, [days, load]);
+
   if (!data) return <div className="empty">Loading results…</div>;
 
   const counts: Record<string, number> = {};
-  data.funnel.forEach((f) => (counts[f.stage] = f.count));
-  const top = Math.max(1, counts["new"] || 0);
+  data.funnel.forEach((x: any) => (counts[x.stage] = x.count));
+  const total = ORDER.reduce((s, [k]) => s + (counts[k] || 0), 0);
+  const top = Math.max(1, ...ORDER.map(([k]) => counts[k] || 0));
   const inr = (n: number) => "₹" + (n || 0).toLocaleString("en-IN");
+  const ins = data.insights || {};
 
   return (
     <div className="results">
@@ -23,14 +34,28 @@ export default function ResultsScreen({ onStage }: { onStage: (state: string) =>
       <div className="r-head">
         <h1>Where every lead is, and where the money stands.</h1>
         <div className="r-range">
-          <button className="rr">7D</button><button className="rr">30D</button>
-          <button className="rr on">90D</button><button className="rr custom">Custom ▾</button>
+          {[7, 30, 90].map((d) => (
+            <button key={d} className={`rr ${days === d && !showCustom ? "on" : ""}`}
+              onClick={() => { setShowCustom(false); setDays(d); }}>{d}D</button>
+          ))}
+          <button className={`rr custom ${showCustom ? "on" : ""}`}
+            onClick={() => setShowCustom((v) => !v)}>Custom ▾</button>
         </div>
       </div>
 
+      {showCustom && (
+        <div className="r-custom">
+          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          <span>→</span>
+          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          <button className="r-apply" disabled={!from || !to}
+            onClick={() => load(days, from, to)}>Apply</button>
+        </div>
+      )}
+
       <div className="r-card funnel">
         <div className="funnel-h"><span className="t">Admission funnel</span>
-          <span className="m">{top} leads</span></div>
+          <span className="m">{total} leads</span></div>
         <div className="bars">
           {ORDER.map(([k, label], i) => {
             const c = counts[k] || 0;
@@ -48,6 +73,23 @@ export default function ResultsScreen({ onStage }: { onStage: (state: string) =>
           })}
         </div>
         <div className="fhint">Click any stage → opens Chats, filtered.</div>
+      </div>
+
+      <div className="r3">
+        <div className="r-card ins amber">
+          <div className="big">{ins.days_in_docs != null ? `${ins.days_in_docs} days in Docs` : "Docs"}</div>
+          <p>The slowest room — most stalls are one missing file.</p>
+          <button className="stuck" onClick={() => onStage("docs")}>
+            See the <b>{ins.stuck || 0}</b> stuck leads ↗</button>
+        </div>
+        <div className="r-card ins">
+          <div className="big">{ins.days_to_pay != null ? `${ins.days_to_pay} days` : "—"}</div>
+          <p>Median first message → payment.</p>
+        </div>
+        <div className="r-card ins">
+          <div className="big g">{ins.maya_pct || 0}% Maya-driven</div>
+          <p>Share of conversations Maya handled end-to-end.</p>
+        </div>
       </div>
 
       <div className="r-msec"><h2>The money, honestly</h2>

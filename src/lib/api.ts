@@ -109,10 +109,11 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ driver, by }),
     }),
-  analytics: () =>
-    req<{ funnel: { stage: string; count: number }[];
-          money: { captured: number; in_motion: number; converted: number } }>(
-      `/api/analytics?business_id=${BUSINESS_ID}`),
+  analytics: (days = 90, from?: string, to?: string) => {
+    let q = `?business_id=${BUSINESS_ID}&days=${days}`;
+    if (from && to) q += `&date_from=${from}&date_to=${to}`;
+    return req<any>(`/api/analytics${q}`);
+  },
   noaAction: (id: string, action: "received" | "more_docs") =>
     req<{ ok: boolean; state: string | null }>(`/api/leads/${id}/noa`, {
       method: "POST", body: JSON.stringify({ action }),
