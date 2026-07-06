@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 
 const ORDER: [string, string][] = [
   ["new", "New"], ["engaged", "Engaged"], ["eligible", "Eligible"],
-  ["docs", "Docs"], ["noa_requested", "NOA"], ["payment_due", "Payment"], ["converted", "Done"],
+  ["docs", "Docs"], ["noa", "NOA"], ["payment_due", "Payment"], ["converted", "Done"],
 ];
 
 export default function ResultsScreen({ onStage }: { onStage: (state: string) => void }) {
@@ -59,7 +59,7 @@ export default function ResultsScreen({ onStage }: { onStage: (state: string) =>
         <div className="bars">
           {ORDER.map(([k, label], i) => {
             const c = counts[k] || 0;
-            const h = Math.max(8, Math.round((c / top) * 100));
+            const h = c === 0 ? 6 : Math.max(18, Math.round((c / top) * 100));
             const prev = i > 0 ? (counts[ORDER[i - 1][0]] || 0) : c;
             const drop = i > 0 && prev > 0 ? Math.round(((c - prev) / prev) * 100) : 0;
             const cls = k === "docs" ? "amber" : k === "converted" ? "done" : "";

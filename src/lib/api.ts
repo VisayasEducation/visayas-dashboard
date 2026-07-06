@@ -19,6 +19,7 @@ export type Lead = {
   last_inbound_at: string | null;
   window_open: boolean;
   window_seconds_left: number;
+  requisition_sent?: boolean;
   updated_at: string;
   created_at: string;
 };
@@ -34,6 +35,16 @@ export type TimelineEvent = {
   kind: "message" | "event";
   ts: string;
   data: any;
+};
+
+export type Requisition = {
+  lead_id: string;
+  name: string | null;
+  state: string | null;
+  draft: { to: string; cc: string; subject: string; body: string };
+  files: { filename: string; url: string }[];
+  docs_complete: boolean;
+  already_sent: boolean;
 };
 
 export type Brain = {
@@ -118,6 +129,15 @@ export const api = {
     req<{ ok: boolean; state: string | null }>(`/api/leads/${id}/noa`, {
       method: "POST", body: JSON.stringify({ action }),
     }),
+  requisition: (id: string) => req<Requisition>(`/api/leads/${id}/requisition`),
+  sendRequisition: (
+    id: string,
+    payload: { to: string; cc: string; subject: string; body: string; by: string }
+  ) =>
+    req<{ ok: boolean; state: string | null; files_sent: number }>(
+      `/api/leads/${id}/requisition/send`,
+      { method: "POST", body: JSON.stringify(payload) }
+    ),
   downloadDocs: async (id: string, name: string) => {
     const res = await fetch(`${API_BASE}/api/leads/${id}/documents.zip`, { headers: headers() });
     if (!res.ok) return;

@@ -5,6 +5,8 @@ import ConversationList from "@/components/ConversationList";
 import ThreadPanel from "@/components/ThreadPanel";
 import BrainPanel from "@/components/BrainPanel";
 import ResultsScreen from "@/components/ResultsScreen";
+import RequisitionBanner from "@/components/RequisitionBanner";
+import RequisitionModal from "@/components/RequisitionModal";
 
 const ME = "Counsellor"; // login step replaces this with the signed-in user's name
 
@@ -16,6 +18,7 @@ export default function InboxPage() {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [brain, setBrain] = useState<Brain | null>(null);
   const [brainOpen, setBrainOpen] = useState(false);
+  const [reqOpen, setReqOpen] = useState(false);
   const [screen, setScreen] = useState<"chats" | "results">("chats");
   useEffect(() => {
     if (typeof window !== "undefined" && !localStorage.getItem("maya_token")) {
@@ -92,8 +95,16 @@ export default function InboxPage() {
 
   // derive the list from the board + filter
   let leads: Lead[] = board ? Object.values(board.board).flat() : [];
-  if (filter) leads = leads.filter((l) => l.state === filter);
+  const isReqDue = (l: Lead) => l.state === "noa" && !l.requisition_sent;
+  if (filter === "requisition_due") {
+    leads = leads.filter(isReqDue);
+  } else if (filter) {
+    leads = leads.filter((l) => l.state === filter);
+  }
   leads.sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at));
+  const reqDueCount = board
+    ? Object.values(board.board).flat().filter(isReqDue).length
+    : 0;
 
   const humanCount = board
     ? Object.values(board.board).flat().filter((l) => l.driven_by === "human").length
@@ -126,7 +137,7 @@ export default function InboxPage() {
       <div className={`main ${currentLead ? "with-brain" : ""}`}>
         <ConversationList
           leads={leads}
-          counts={board?.counts || {}}
+          counts={{ ...(board?.counts || {}), requisition_due: reqDueCount }}
           total={board?.total || 0}
           filter={filter}
           currentId={currentId}
@@ -136,6 +147,9 @@ export default function InboxPage() {
         />
 
         <div className="thread-wrap">
+          {currentLead && currentLead.state === "noa" && !currentLead.requisition_sent && (
+            <RequisitionBanner name={currentLead.name} onOpen={() => setReqOpen(true)} />
+          )}
           {err && !board ? (
             <div className="empty">
               Couldn&apos;t reach the backend.
@@ -159,6 +173,18 @@ export default function InboxPage() {
 
         {currentLead && <BrainPanel brain={brain} leadId={currentId} open={brainOpen} onClose={() => setBrainOpen(false)} />}
       </div>
+      )}
+
+      {reqOpen && currentId && (
+        <RequisitionModal
+          leadId={currentId}
+          onClose={() => setReqOpen(false)}
+          onSent={() => {
+            showToast("Requisition sent — family notified");
+            loadBoard();
+            if (currentId) openLead(currentId);
+          }}
+        />
       )}
 
       <div className={`toast ${toast ? "show" : ""}`}>{toast}</div>

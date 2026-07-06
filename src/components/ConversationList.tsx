@@ -8,7 +8,8 @@ const FILTERS: { key: string | null; label: string }[] = [
   { key: "engaged", label: "Engaged" },
   { key: "eligible", label: "Eligible" },
   { key: "docs", label: "Docs" },
-  { key: "noa_requested", label: "NOA" },
+  { key: "requisition_due", label: "Requisition" },
+  { key: "noa", label: "NOA" },
   { key: "payment_due", label: "Payment" },
   { key: "converted", label: "Converted" },
 ];
@@ -74,7 +75,11 @@ export default function ConversationList({
                   {l.concern ? `Concern: ${l.concern}` : l.city || l.source || "—"}
                 </div>
                 <div>
-                  <span className={`rtag ${st}`}>{st.replace(/_/g, " ")}</span>
+                  {st === "noa" && !l.requisition_sent ? (
+                    <span className="rtag" style={{ background: "#eef2fb", color: "#3b5bdb" }}>requisition due</span>
+                  ) : (
+                    <span className={`rtag ${st}`}>{st.replace(/_/g, " ")}</span>
+                  )}
                   {l.driven_by === "human" ? (
                     <span className="rdrv human">● human</span>
                   ) : (

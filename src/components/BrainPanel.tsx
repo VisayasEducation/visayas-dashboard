@@ -3,14 +3,14 @@ import { api, Brain } from "@/lib/api";
 
 const STAGE_RAIL: [string, string][] = [
   ["new", "New"], ["engaged", "Engaged"], ["eligible", "Eligible"],
-  ["docs", "Docs"], ["noa_requested", "NOA"], ["payment_due", "Payment"], ["converted", "Done"],
+  ["docs", "Docs"], ["noa", "NOA"], ["payment_due", "Payment"], ["converted", "Done"],
 ];
 const STAGE_DESC: Record<string, string> = {
   new: "Just reached out. Maya is greeting and learning what they need.",
   engaged: "In conversation. Maya is helping and gathering the eligibility picture.",
   eligible: "They can proceed. Maya is moving toward document collection.",
   docs: "Collecting the documents for the Note of Acceptance.",
-  noa_requested: "Documents in — the request has gone to the college. Awaiting the NOA.",
+  noa: "All documents in. Send the requisition from the banner, then wait for the NOA to come back.",
   payment_due: "NOA ready. The booking payment secures the seat.",
   converted: "Paid and joined. A counsellor now handles visa, travel and enrolment.",
   closed: "This conversation is closed.",
@@ -48,7 +48,7 @@ export default function BrainPanel({
   if (!brain) return <div className="bi-empty">Select a conversation</div>;
 
   const { identity: id, state } = brain;
-  const isDocs = state === "docs" || state === "noa_requested";
+  const isDocs = state === "docs" || state === "noa";
   const isPayment = state === "payment_due";
   const isConverted = state === "converted";
   const showLearning = state === "new" || state === "engaged" || state === "eligible";
@@ -156,19 +156,10 @@ export default function BrainPanel({
         </div>
       )}
 
-      {state === "noa_requested" && leadId && (
+      {state === "noa" && leadId && (
         <div className="bi-card noa">
           <div className="bi-sub"><span>Note of Acceptance</span></div>
-          <p className="noa-hint">Drafted letter — edit before sending:</p>
-          <textarea className="noa-draft" defaultValue={
-`Dear ${id.name || "Student"},
-
-Congratulations! Based on your submitted documents, UV Gullas College of Medicine is pleased to issue your Note of Acceptance for the upcoming MBBS batch.
-
-Please find the details and next steps attached. We look forward to welcoming you.
-
-Warm regards,
-Admissions Office, UV Gullas College of Medicine`} />
+          <p className="noa-hint">Send the requisition from the banner on the conversation. When the college replies, mark the NOA:</p>
           <div className="noa-actions">
             <button className="noa-recv"
               onClick={async () => { await api.noaAction(leadId, "received"); location.reload(); }}>
