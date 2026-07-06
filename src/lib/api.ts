@@ -64,12 +64,20 @@ export type Brain = {
 };
 
 function headers(): HeadersInit {
-  // login step: return { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
-  return { "Content-Type": "application/json" };
+  const h: Record<string, string> = { "Content-Type": "application/json" };
+  if (typeof window !== "undefined") {
+    const t = localStorage.getItem("maya_token");
+    if (t) h.Authorization = `Bearer ${t}`;
+  }
+  return h;
 }
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, { ...init, headers: headers() });
+  if (res.status === 401 && typeof window !== "undefined") {
+    localStorage.removeItem("maya_token");
+    if (!location.pathname.startsWith("/login")) location.href = "/login";
+  }
   if (!res.ok) {
     let detail = await res.text();
     try {
@@ -81,6 +89,11 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  login: (username: string, password: string) =>
+    req<{ token: string; name: string; username: string }>(`/api/login`, {
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+    }),
   board: () => req<Board>(`/api/leads?business_id=${BUSINESS_ID}`),
   detail: (id: string) => req<{ lead: Lead }>(`/api/leads/${id}`),
   timeline: (id: string) =>

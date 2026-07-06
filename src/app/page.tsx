@@ -15,6 +15,11 @@ export default function InboxPage() {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [brain, setBrain] = useState<Brain | null>(null);
   const [brainOpen, setBrainOpen] = useState(false);
+  useEffect(() => {
+    if (typeof window !== "undefined" && !localStorage.getItem("maya_token")) {
+      location.href = "/login";
+    }
+  }, []);
   const [err, setErr] = useState<string | null>(null);
   const [toast, setToast] = useState<string>("");
 

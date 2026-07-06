@@ -216,3 +216,24 @@ button,textarea,input{font-family:inherit}
 /* ---- captured value under a learned item ---- */
 .bi-check .lbl .val{display:block;font-weight:600;color:var(--accent-ink);font-size:12.5px;margin-top:2px}
 .bi-check .lbl .val.muted{color:var(--ink-3);font-weight:400;font-style:italic}
+/* ---- login ---- */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(900px 500px at 50% -10%,#eef5f0 0%,rgba(238,245,240,0) 60%),var(--bg,#f4f6f4)}
+.login-card{width:100%;max-width:392px;background:#fff;border:1px solid var(--hair,#e7ebe7);border-radius:18px;
+  padding:34px 32px 30px;box-shadow:0 1px 2px rgba(16,34,26,.04),0 14px 40px rgba(16,34,26,.07)}
+.login-card h1{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:22px;color:var(--ink,#16221c)}
+.login-field{margin-bottom:16px}
+.login-field label{display:block;font-size:12px;font-weight:600;color:var(--ink-2,#54625b);margin-bottom:7px}
+.login-field input{width:100%;font-size:14.5px;color:var(--ink,#16221c);background:var(--surface,#fafbfa);
+  border:1px solid var(--hair,#d8ded8);border-radius:11px;padding:12px 14px;transition:border-color .12s,box-shadow .12s}
+.login-field input:focus{outline:none;background:#fff;border-color:var(--accent,#0c6e46);
+  box-shadow:0 0 0 3px rgba(12,110,70,.13)}
+.login-pw{position:relative}
+.login-pw .peek{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;
+  cursor:pointer;color:var(--ink-3,#8a958e);font-size:12px;font-weight:600;padding:6px 9px;border-radius:8px}
+.login-btn{width:100%;margin-top:8px;font-size:14.5px;font-weight:600;color:#fff;background:var(--accent,#0c6e46);
+  border:none;border-radius:11px;padding:13px;cursor:pointer}
+.login-btn:hover{background:var(--accent-ink,#0a5637)}
+.login-btn:disabled{opacity:.6;cursor:default}
+.login-err{display:flex;align-items:center;gap:9px;font-size:12.5px;color:#a1443b;background:#faece9;
+  border:1px solid #eccdc8;border-radius:10px;padding:10px 13px;margin-bottom:18px}
