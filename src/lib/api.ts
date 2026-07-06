@@ -109,4 +109,22 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ driver, by }),
     }),
+  analytics: () =>
+    req<{ funnel: { stage: string; count: number }[];
+          money: { captured: number; in_motion: number; converted: number } }>(
+      `/api/analytics?business_id=${BUSINESS_ID}`),
+  noaAction: (id: string, action: "received" | "more_docs") =>
+    req<{ ok: boolean; state: string | null }>(`/api/leads/${id}/noa`, {
+      method: "POST", body: JSON.stringify({ action }),
+    }),
+  downloadDocs: async (id: string, name: string) => {
+    const res = await fetch(`${API_BASE}/api/leads/${id}/documents.zip`, { headers: headers() });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${name.replace(/ /g, "_")}_${id.slice(0, 8)} Documents.zip`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  },
 };

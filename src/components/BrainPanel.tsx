@@ -1,5 +1,5 @@
 "use client";
-import { Brain } from "@/lib/api";
+import { api, Brain } from "@/lib/api";
 
 const STAGE_RAIL: [string, string][] = [
   ["new", "New"], ["engaged", "Engaged"], ["eligible", "Eligible"],
@@ -43,8 +43,8 @@ function Row({ k, v, muted }: { k: string; v: React.ReactNode; muted?: boolean }
 }
 
 export default function BrainPanel({
-  brain, open = false, onClose,
-}: { brain: Brain | null; open?: boolean; onClose?: () => void }) {
+  brain, leadId, open = false, onClose,
+}: { brain: Brain | null; leadId?: string | null; open?: boolean; onClose?: () => void }) {
   if (!brain) return <div className="bi-empty">Select a conversation</div>;
 
   const { identity: id, state } = brain;
@@ -137,9 +137,15 @@ export default function BrainPanel({
       {/* documents */}
       {(isDocs || isPayment || isConverted) && (
         <div className="bi-card">
-          <div className="bi-sub">
+          <div className="bi-sub" style={{ alignItems: "center" }}>
             <span>Documents</span>
-            <span className="bi-hint">{brain.docs.done} of {brain.docs.total}</span>
+            <span className="dl-wrap">
+              {leadId && brain.docs.done > 0 && (
+                <button className="dl-btn"
+                        onClick={() => api.downloadDocs(leadId, id.name || "lead")}>⬇ Download</button>
+              )}
+              <span className="bi-hint">{brain.docs.done} of {brain.docs.total}</span>
+            </span>
           </div>
           {brain.docs.items.map((d) => (
             <div key={d.key} className={`bi-check ${d.done ? "done" : ""}`}>
@@ -147,6 +153,30 @@ export default function BrainPanel({
               <span className="lbl">{d.label}</span>
             </div>
           ))}
+        </div>
+      )}
+
+      {state === "noa_requested" && leadId && (
+        <div className="bi-card noa">
+          <div className="bi-sub"><span>Note of Acceptance</span></div>
+          <p className="noa-hint">Drafted letter — edit before sending:</p>
+          <textarea className="noa-draft" defaultValue={
+`Dear ${id.name || "Student"},
+
+Congratulations! Based on your submitted documents, UV Gullas College of Medicine is pleased to issue your Note of Acceptance for the upcoming MBBS batch.
+
+Please find the details and next steps attached. We look forward to welcoming you.
+
+Warm regards,
+Admissions Office, UV Gullas College of Medicine`} />
+          <div className="noa-actions">
+            <button className="noa-recv"
+              onClick={async () => { await api.noaAction(leadId, "received"); location.reload(); }}>
+              NOA received</button>
+            <button className="noa-more"
+              onClick={async () => { await api.noaAction(leadId, "more_docs"); location.reload(); }}>
+              More docs needed</button>
+          </div>
         </div>
       )}
 

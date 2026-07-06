@@ -4,6 +4,7 @@ import { api, Board, Lead, TimelineEvent, Brain } from "@/lib/api";
 import ConversationList from "@/components/ConversationList";
 import ThreadPanel from "@/components/ThreadPanel";
 import BrainPanel from "@/components/BrainPanel";
+import ResultsScreen from "@/components/ResultsScreen";
 
 const ME = "Counsellor"; // login step replaces this with the signed-in user's name
 
@@ -15,6 +16,7 @@ export default function InboxPage() {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [brain, setBrain] = useState<Brain | null>(null);
   const [brainOpen, setBrainOpen] = useState(false);
+  const [screen, setScreen] = useState<"chats" | "results">("chats");
   useEffect(() => {
     if (typeof window !== "undefined" && !localStorage.getItem("maya_token")) {
       location.href = "/login";
@@ -108,13 +110,19 @@ export default function InboxPage() {
         <span className="brand">
           Maya<span className="dot">·</span>Inbox
         </span>
-        <div className="biz">
-          <button className="on">UV Gullas</button>
-        </div>
+        <span className="biz-label">UV Gullas</span>
+        <span className="nav-div" />
+        <button className={`navtab ${screen === "chats" ? "on" : ""}`}
+                onClick={() => setScreen("chats")}>Chats</button>
+        <button className={`navtab ${screen === "results" ? "on" : ""}`}
+                onClick={() => setScreen("results")}>Results</button>
         <span className="sp" />
         <span className="me">RV</span>
       </div>
 
+      {screen === "results" ? (
+        <ResultsScreen onStage={(s) => { setFilter(s); setScreen("chats"); }} />
+      ) : (
       <div className={`main ${currentLead ? "with-brain" : ""}`}>
         <ConversationList
           leads={leads}
@@ -149,8 +157,9 @@ export default function InboxPage() {
           )}
         </div>
 
-        {currentLead && <BrainPanel brain={brain} open={brainOpen} onClose={() => setBrainOpen(false)} />}
+        {currentLead && <BrainPanel brain={brain} leadId={currentId} open={brainOpen} onClose={() => setBrainOpen(false)} />}
       </div>
+      )}
 
       <div className={`toast ${toast ? "show" : ""}`}>{toast}</div>
     </div>
