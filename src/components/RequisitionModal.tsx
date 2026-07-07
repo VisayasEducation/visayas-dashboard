@@ -22,9 +22,17 @@ export default function RequisitionModal({
   }, [leadId]);
 
   async function send() {
+    if (r && r.files.length < 5) {
+      const ok = window.confirm(
+        `Only ${r.files.length} of 5 documents are attached. Send anyway?`);
+      if (!ok) return;
+    }
     setSending(true);
     try {
-      await api.sendRequisition(leadId, { to, cc, subject, body, by: "dashboard" });
+      await api.sendRequisition(leadId, {
+        to, cc, subject, body, by: "dashboard",
+        force: !!(r && r.files.length < 5),
+      } as any);
       onSent(); onClose();
     } catch (e: any) { setErr(String(e.message || e)); setSending(false); }
   }
