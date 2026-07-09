@@ -149,3 +149,74 @@ export const api = {
     document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   },
 };
+
+// ---------------- payments & document verification ----------------
+export type PaymentLedger = {
+  items: { amount_paise: number; method: string | null; by: string | null; at: string }[];
+  paid_paise: number; goal_paise: number; balance_paise: number;
+  razorpay_link_url: string | null;
+  expected_visit?: string | null; counsellor?: string | null;
+};
+
+export async function getPayments(leadId: string): Promise<PaymentLedger> {
+  const r = await fetch(`${API_BASE}/api/leads/${leadId}/payments`);
+  if (!r.ok) throw new Error("payments fetch failed");
+  return r.json();
+}
+
+export async function recordOfficePayment(leadId: string, amount_rupees: number,
+                                          staff_name: string, note = "",
+                                          idempotency_key = "") {
+  const r = await fetch(`${API_BASE}/api/leads/${leadId}/payments/manual`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount_rupees, staff_name, note, idempotency_key }),
+  });
+  if (!r.ok) throw new Error("payment record failed");
+  return r.json();
+}
+
+export async function resendPaymentLink(leadId: string) {
+  const r = await fetch(`${API_BASE}/api/leads/${leadId}/payments/resend-link`, { method: "POST" });
+  if (!r.ok) throw new Error("resend failed");
+  return r.json();
+}
+
+export async function verifyFlaggedDoc(leadId: string, slot: string,
+                                       ok: boolean, staff_name: string) {
+  const r = await fetch(`${API_BASE}/api/leads/${leadId}/docs/${slot}/verify`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ok, staff_name }),
+  });
+  if (!r.ok) throw new Error("verify failed");
+  return r.json();
+}
+
+export async function sendOriginalAgain(leadId: string) {
+  const r = await fetch(`${API_BASE}/api/leads/${leadId}/noa/send-original`, { method: "POST" });
+  if (!r.ok) throw new Error("send original failed");
+  return r.json();
+}
+
+export async function assignCounsellor(leadId: string, counsellor: string, staff_name: string) {
+  const r = await fetch(`${API_BASE}/api/leads/${leadId}/handoff/assign`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ counsellor, staff_name }),
+  });
+  if (!r.ok) throw new Error("assign failed");
+  return r.json();
+}
+
+export async function setExpectedVisit(leadId: string, expected_visit: string) {
+  const r = await fetch(`${API_BASE}/api/leads/${leadId}/visit`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ expected_visit }),
+  });
+  if (!r.ok) throw new Error("visit save failed");
+  return r.json();
+}
+
+export async function paymentsSummary(days = 7) {
+  const r = await fetch(`${API_BASE}/api/payments/summary?days=${days}`);
+  if (!r.ok) throw new Error("summary failed");
+  return r.json();
+}
