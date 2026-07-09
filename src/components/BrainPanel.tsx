@@ -42,6 +42,9 @@ function Row({ k, v, muted }: { k: string; v: React.ReactNode; muted?: boolean }
   );
 }
 
+import PaymentsCard from "./PaymentsCard";
+import { verifyFlaggedDoc } from "@/lib/api";
+
 export default function BrainPanel({
   brain, leadId, open = false, onClose,
 }: { brain: Brain | null; leadId?: string | null; open?: boolean; onClose?: () => void }) {
@@ -147,10 +150,37 @@ export default function BrainPanel({
               <span className="bi-hint">{brain.docs.done} of {brain.docs.total}</span>
             </span>
           </div>
-          {brain.docs.items.map((d) => (
+          {brain.docs.items.map((d: any) => (
             <div key={d.key} className={`bi-check ${d.done ? "done" : ""}`}>
-              <span className="dot">{d.done ? "✓" : ""}</span>
-              <span className="lbl">{d.label}</span>
+              <span className="dot" style={d.flag ? { background: "#b45309" } : undefined}>
+                {d.flag ? "!" : d.done ? "✓" : ""}</span>
+              <span className="lbl">
+                {d.label}
+                {d.flag && <span style={{ display: "block", fontSize: 11,
+                  color: "#b45309", fontWeight: 600 }}>
+                  Needs a look — {d.flag.reason || "flagged"}</span>}
+              </span>
+              {d.flag && leadId && (
+                <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+                  <button onClick={async () => {
+                      const who = prompt("Verifying as (your name):") || "";
+                      if (!who.trim()) return;
+                      await verifyFlaggedDoc(leadId, d.key, true, who.trim());
+                      location.reload(); }}
+                    style={{ fontSize: 11, fontWeight: 700, padding: "4px 9px",
+                             borderRadius: 7, border: "none", background: "#0b6b46",
+                             color: "#fff", cursor: "pointer" }}>Verify</button>
+                  <button onClick={async () => {
+                      const who = prompt("Rejecting as (your name):") || "";
+                      if (!who.trim()) return;
+                      await verifyFlaggedDoc(leadId, d.key, false, who.trim());
+                      location.reload(); }}
+                    style={{ fontSize: 11, fontWeight: 700, padding: "4px 9px",
+                             borderRadius: 7, border: "1px solid #e7e5e4",
+                             background: "#fff", color: "#b3372f",
+                             cursor: "pointer" }}>Reject</button>
+                </span>
+              )}
             </div>
           ))}
         </div>
@@ -172,26 +202,8 @@ export default function BrainPanel({
       )}
 
       {/* payment / converted */}
-      {(isPayment || isConverted) && (
-        <div className="bi-card amber">
-          <div className="bi-sub">
-            <span>{isConverted ? "Initial payment" : "Payment due"}</span>
-            <span className="bi-hint">Gullas config</span>
-          </div>
-          {brain.payment.due == null ? (
-            <div className="bi-note">No payment recorded yet — the payment step wires this.</div>
-          ) : (
-            <>
-              <div className="bi-money">
-                ₹{(brain.payment.paid || 0).toLocaleString()}{" "}
-                <span className="of">of ₹{brain.payment.due.toLocaleString()}</span>
-              </div>
-              <div className="bi-bar">
-                <span style={{ width: `${Math.min(100, (brain.payment.paid / brain.payment.due) * 100)}%` }} />
-              </div>
-            </>
-          )}
-        </div>
+      {(isPayment || isConverted) && leadId && (
+        <PaymentsCard leadId={leadId} state={state} />
       )}
 
       {/* gate */}
