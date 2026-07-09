@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, paymentsSummary } from "@/lib/api";
 
 const ORDER: [string, string][] = [
   ["new", "New"], ["engaged", "Engaged"], ["eligible", "Eligible"],
@@ -18,6 +18,8 @@ export default function ResultsScreen({ onStage }: { onStage: (state: string) =>
     api.analytics(d, f, t).then(setData).catch(() => {});
   }, []);
   useEffect(() => { load(days); }, [days, load]);
+  const [pays, setPays] = useState<any>(null);
+  useEffect(() => { paymentsSummary(days).then(setPays).catch(() => {}); }, [days]);
 
   if (!data) return <div className="empty">Loading results…</div>;
 
@@ -31,6 +33,25 @@ export default function ResultsScreen({ onStage }: { onStage: (state: string) =>
   return (
     <div className="results">
       <div className="r-eyebrow">Results · UV Gullas</div>
+      {pays && (
+        <div style={{ display: "flex", gap: 10, margin: "10px 0 4px" }}>
+          <div style={{ background: "#fff", border: "1px solid #e7e5e4",
+                        borderRadius: 10, padding: "8px 14px", fontSize: 12.5 }}>
+            <b style={{ fontSize: 15 }}>{inr(Math.round((pays.collected_paise || 0) / 100))}</b>
+            {" "}<span style={{ color: "#57534e" }}>collected · {days}D</span>
+          </div>
+          <div style={{ background: "#fff", border: "1px solid #e7e5e4",
+                        borderRadius: 10, padding: "8px 14px", fontSize: 12.5 }}>
+            <b style={{ fontSize: 15, color: "#9a6700" }}>{pays.pending}</b>
+            {" "}<span style={{ color: "#57534e" }}>awaiting payment</span>
+          </div>
+          <div style={{ background: "#fff", border: "1px solid #e7e5e4",
+                        borderRadius: 10, padding: "8px 14px", fontSize: 12.5 }}>
+            <b style={{ fontSize: 15, color: "#a13d34" }}>{pays.overdue}</b>
+            {" "}<span style={{ color: "#57534e" }}>quiet 3+ days</span>
+          </div>
+        </div>
+      )}
       <div className="r-head">
         <h1>Where every lead is, and where the money stands.</h1>
         <div className="r-range">
