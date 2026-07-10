@@ -101,8 +101,12 @@ export default function PaymentsCard({ leadId, state }:
           </button>
           {led.razorpay_link_url && (
             <button onClick={async () => {
-                try { await resendPaymentLink(leadId); setMsg("Link sent to the family again."); }
-                catch { setMsg("Could not send the link — try again."); } }}
+                try {
+                  const r: any = await resendPaymentLink(leadId);
+                  setMsg(r?.delivered === false
+                    ? "NOT delivered — 24h window closed. Alert sent; call the family."
+                    : "Link sent to the family again.");
+                } catch { setMsg("Could not send the link — try again."); } }}
               style={{ flex: 1, background: "#fff", color: "#57534e",
                        border: "1px solid #e7e5e4", borderRadius: 8,
                        padding: "9px 10px", fontWeight: 700, fontSize: 12.5,

@@ -170,7 +170,9 @@ export const recordOfficePayment = (leadId: string, amount_rupees: number,
       { method: "POST", body: JSON.stringify({ amount_rupees, staff_name, note, idempotency_key }) });
 
 export const resendPaymentLink = (leadId: string) =>
-  req(`/api/leads/${leadId}/payments/resend-link`, { method: "POST" });
+  req<{ ok: boolean; delivered?: boolean; paid_paise?: number;
+        balance_paise?: number }>(
+    `/api/leads/${leadId}/payments/resend-link`, { method: "POST" });
 
 export const verifyFlaggedDoc = (leadId: string, slot: string, ok: boolean, staff_name: string) =>
   req(`/api/leads/${leadId}/docs/${slot}/verify`,
@@ -185,6 +187,11 @@ export const assignCounsellor = (leadId: string, counsellor: string, staff_name:
 
 export const setExpectedVisit = (leadId: string, expected_visit: string) =>
   req(`/api/leads/${leadId}/visit`, { method: "POST", body: JSON.stringify({ expected_visit }) });
+
+export const openLeadFile = async (leadId: string, kind: string) => {
+  const r = await req<{ url: string }>(`/api/leads/${leadId}/files/${kind}`);
+  if (r?.url) window.open(r.url, "_blank", "noopener");
+};
 
 export const paymentsSummary = (days = 7) =>
   req<{ collected_paise: number; pending: number; overdue: number }>(

@@ -43,7 +43,7 @@ function Row({ k, v, muted }: { k: string; v: React.ReactNode; muted?: boolean }
 }
 
 import PaymentsCard from "./PaymentsCard";
-import { verifyFlaggedDoc } from "@/lib/api";
+import { verifyFlaggedDoc, openLeadFile } from "@/lib/api";
 
 export default function BrainPanel({
   brain, leadId, open = false, onClose,
@@ -160,6 +160,16 @@ export default function BrainPanel({
                   color: "#b45309", fontWeight: 600 }}>
                   Needs a look — {d.flag.reason || "flagged"}</span>}
               </span>
+              {d.done && !d.flag && leadId && (
+                <button
+                  onClick={() => openLeadFile(leadId, d.key)}
+                  style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700,
+                           padding: "3px 8px", borderRadius: 6,
+                           border: "1px solid #d3e6dc", background: "#eef6f1",
+                           color: "#0b6b46", cursor: "pointer" }}>
+                  View
+                </button>
+              )}
               {d.flag && leadId && (
                 <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
                   <button onClick={async () => {
@@ -197,6 +207,48 @@ export default function BrainPanel({
             <button className="noa-more"
               onClick={async () => { await api.noaAction(leadId, "more_docs"); location.reload(); }}>
               More docs needed</button>
+          </div>
+        </div>
+      )}
+      
+      {/* NOA vault (v9) */}
+      {(state === "noa" || isPayment || isConverted) && leadId && (
+        <div className="bi-card">
+          <div className="bi-sub">
+            <span>NOA vault</span>
+            <span className="bi-hint">private · R2</span>
+          </div>
+          <div className="bi-check done">
+            <span className="dot">✓</span>
+            <span className="lbl">
+              Stamped copy
+              <span className="val">{isPayment || isConverted ? "Sent to family" : "Ready"}</span>
+            </span>
+            <button
+              onClick={() => openLeadFile(leadId, "noa_copy")}
+              style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700,
+                       padding: "3px 8px", borderRadius: 6,
+                       border: "1px solid #d3e6dc", background: "#eef6f1",
+                       color: "#0b6b46", cursor: "pointer" }}>View</button>
+          </div>
+          <div className={`bi-check ${isConverted ? "done" : ""}`}>
+            <span className="dot">{isConverted ? "✓" : ""}</span>
+            <span className="lbl">
+              Original (colour)
+              <span className="val">
+                {isConverted ? "Released to family" : "Held · releases on payment"}
+              </span>
+            </span>
+            {isConverted ? (
+              <button
+                onClick={() => openLeadFile(leadId, "noa_original")}
+                style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700,
+                         padding: "3px 8px", borderRadius: 6,
+                         border: "1px solid #d3e6dc", background: "#eef6f1",
+                         color: "#0b6b46", cursor: "pointer" }}>View</button>
+            ) : (
+              <span style={{ marginLeft: "auto", fontSize: 11, color: "#8f8f88" }}>🔒 held</span>
+            )}
           </div>
         </div>
       )}

@@ -34,6 +34,13 @@ button,textarea,input{font-family:inherit}
 .filters{display:flex;gap:6px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid var(--hair-2)}
 .filters button{font-size:12px;color:var(--ink-2);background:var(--sunken);border:1px solid var(--hair);padding:4px 10px;border-radius:999px;cursor:pointer}
 .filters button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.search { padding: 0 14px 10px; }
+.search input {
+  width: 100%; border: 1px solid var(--hair); background: var(--sunken);
+  border-radius: 10px; padding: 9px 12px; font: inherit; font-size: 13px;
+  outline: none;
+}
+.search input:focus { border-color: var(--accent-border); background: #fff; }
 .rows{flex:1;overflow-y:auto}
 .row{display:flex;gap:11px;padding:13px 18px;border-bottom:1px solid var(--hair-2);cursor:pointer;transition:background .12s}
 .row:hover{background:var(--sunken)}

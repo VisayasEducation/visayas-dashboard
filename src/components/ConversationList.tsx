@@ -14,6 +14,8 @@ const FILTERS: { key: string | null; label: string }[] = [
   { key: "converted", label: "Converted" },
 ];
 
+import { useState } from "react";
+
 export default function ConversationList({
   leads,
   counts,
@@ -33,11 +35,24 @@ export default function ConversationList({
   onSelect: (id: string) => void;
   sub: string;
 }) {
+  const [q, setQ] = useState("");
+  const visible = q.trim()
+    ? leads.filter((l) =>
+        (l.name || "").toLowerCase().includes(q.trim().toLowerCase()) ||
+        (l.phone || "").includes(q.trim()))
+    : leads;
   return (
     <div className="list">
       <div className="list-head">
         <h2>Conversations</h2>
         <div className="sub">{sub}</div>
+      </div>
+      <div className="search">
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search conversations"
+        />
       </div>
       <div className="filters">
         {FILTERS.map((f) => {
@@ -54,8 +69,8 @@ export default function ConversationList({
         })}
       </div>
       <div className="rows">
-        {leads.length === 0 && <div className="spin">No conversations here.</div>}
-        {leads.map((l) => {
+        {visible.length === 0 && <div className="spin">No conversations here.</div>}
+        {visible.map((l) => {
           const st = l.state || "new";
           return (
             <div
