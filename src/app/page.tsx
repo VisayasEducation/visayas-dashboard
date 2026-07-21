@@ -93,6 +93,7 @@ export default function InboxPage() {
     loadBoard();
     // 5s polling for near-live updates; real-time push is a tracked later step.
     const t = setInterval(() => {
+      if (document.hidden) return; // invisible tab: skip the fetch, let the DB sleep
       loadBoard();
       if (currentId) openLead(currentId); // refresh the open thread too
     }, 5000);
