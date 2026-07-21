@@ -74,6 +74,14 @@ export type Brain = {
   driven_by: string;
 };
 
+export type BizRef = { business_id: string; slug: string; display_name: string };
+export type Session = {
+  user: { id: string; username: string; name: string };
+  role: string;
+  active_business: BizRef | null;
+  memberships: (BizRef & { role: string })[];
+};
+
 function headers(): HeadersInit {
   const h: Record<string, string> = { "Content-Type": "application/json" };
   if (typeof window !== "undefined") {
@@ -104,6 +112,12 @@ export const api = {
     req<{ token: string; name: string; username: string }>(`/api/login`, {
       method: "POST",
       body: JSON.stringify({ username, password }),
+    }),
+  sessionMe: () => req<Session>(`/session/me`),
+  switchBusiness: (business_id: string) =>
+    req<Session & { token: string }>(`/session/switch-business`, {
+      method: "POST",
+      body: JSON.stringify({ business_id }),
     }),
   board: () => req<Board>(`/api/leads?business_id=${BUSINESS_ID}`),
   detail: (id: string) => req<{ lead: Lead }>(`/api/leads/${id}`),

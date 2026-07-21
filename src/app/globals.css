@@ -325,3 +325,20 @@ button,textarea,input{font-family:inherit}
   border:none;border-radius:10px;padding:9px 16px;cursor:pointer}
 .r-apply:disabled{background:var(--ink-4);cursor:not-allowed}
 .r-apply:not(:disabled):hover{background:var(--accent-ink)}
+
+/* ---- college switcher ---- */
+.biz-switch{position:relative}
+.biz-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;
+  color:var(--ink);background:var(--sunken);border:1px solid var(--hair);
+  border-radius:999px;padding:4px 12px;cursor:pointer}
+.biz-pill:disabled{opacity:.6;cursor:wait}
+.biz-pill .chev{font-size:10px;opacity:.7}
+.biz-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:220px;z-index:50;
+  background:#fff;border:1px solid var(--hair);border-radius:10px;
+  box-shadow:0 8px 24px -8px rgba(0,0,0,.18);padding:4px;display:flex;flex-direction:column}
+.biz-item{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  text-align:left;font-size:13px;padding:8px 10px;border:0;background:transparent;
+  border-radius:7px;cursor:pointer;color:var(--ink)}
+.biz-item:hover{background:var(--sunken)}
+.biz-item.on{font-weight:600}
+.biz-item .tick{color:var(--accent);font-size:12px}

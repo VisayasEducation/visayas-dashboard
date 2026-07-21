@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { api, Board, Lead, TimelineEvent, Brain } from "@/lib/api";
+import { api, Board, Lead, TimelineEvent, Brain, Session } from "@/lib/api";
 import ConversationList from "@/components/ConversationList";
 import ThreadPanel from "@/components/ThreadPanel";
 import BrainPanel from "@/components/BrainPanel";
@@ -20,10 +20,20 @@ export default function InboxPage() {
   const [brainOpen, setBrainOpen] = useState(false);
   const [reqOpen, setReqOpen] = useState(false);
   const [screen, setScreen] = useState<"chats" | "results">("chats");
+  const [sess, setSess] = useState<Session | null>(null);
+  const [bizOpen, setBizOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
   useEffect(() => {
     if (typeof window !== "undefined" && !localStorage.getItem("maya_token")) {
       location.href = "/login";
+      return;
     }
+    api.sessionMe().then(setSess).catch((e) => console.error("session/me failed", e));
+    const close = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest?.(".biz-switch")) setBizOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
   }, []);
   const [err, setErr] = useState<string | null>(null);
   const [toast, setToast] = useState<string>("");
@@ -58,6 +68,26 @@ export default function InboxPage() {
       showToast("Couldn't load conversation");
     }
   }, []);
+
+  const switchCollege = async (business_id: string) => {
+    setBizOpen(false);
+    if (switching || business_id === sess?.active_business?.business_id) return;
+    setSwitching(true);
+    try {
+      const r = await api.switchBusiness(business_id);
+      localStorage.setItem("maya_token", r.token); // BEFORE any refetch
+      setSess(r);
+      // old college's lead ids 404 under the new token — clear, then reload
+      setCurrentId(null); setCurrentLead(null); setEvents([]); setBrain(null);
+      setFilter(null); setBoard(null);
+      loadBoard();
+      showToast(`Switched to ${r.active_business?.display_name || ""}`);
+    } catch (e: any) {
+      showToast(String(e.message || e).slice(0, 120)); // loud, stay put
+    } finally {
+      setSwitching(false);
+    }
+  };
 
   useEffect(() => {
     loadBoard();
@@ -121,7 +151,29 @@ export default function InboxPage() {
         <span className="brand">
           Maya<span className="dot">·</span>Inbox
         </span>
-        <span className="biz-label">UV Gullas</span>
+        {sess && sess.memberships.length > 1 ? (
+          <span className="biz-switch">
+            <button className="biz-pill" disabled={switching}
+                    onClick={() => setBizOpen((v) => !v)}>
+              {sess.active_business?.display_name || "Select college"}
+              <span className="chev">{switching ? "…" : "▾"}</span>
+            </button>
+            {bizOpen && (
+              <span className="biz-menu">
+                {sess.memberships.map((b) => (
+                  <button key={b.business_id}
+                          className={`biz-item ${b.business_id === sess.active_business?.business_id ? "on" : ""}`}
+                          onClick={() => switchCollege(b.business_id)}>
+                    {b.display_name}
+                    {b.business_id === sess.active_business?.business_id && <span className="tick">✓</span>}
+                  </button>
+                ))}
+              </span>
+            )}
+          </span>
+        ) : (
+          <span className="biz-label">{sess?.active_business?.display_name || "…"}</span>
+        )}
         <span className="nav-div" />
         <button className={`navtab ${screen === "chats" ? "on" : ""}`}
                 onClick={() => setScreen("chats")}>Chats</button>
