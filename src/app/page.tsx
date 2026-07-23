@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { api, Board, Lead, TimelineEvent, Brain, Session } from "@/lib/api";
+import { api, paymentsSummary, Board, Lead, TimelineEvent, Brain, Session } from "@/lib/api";
 import ConversationList from "@/components/ConversationList";
 import ThreadPanel from "@/components/ThreadPanel";
 import BrainPanel from "@/components/BrainPanel";
@@ -8,7 +8,24 @@ import ResultsScreen from "@/components/ResultsScreen";
 import RequisitionBanner from "@/components/RequisitionBanner";
 import RequisitionModal from "@/components/RequisitionModal";
 
-const ME = "Counsellor"; // login step replaces this with the signed-in user's name
+// ---- per-college theming (redesign v1). Matched on display name; UV Gullas is the default. ----
+const THEMES = [
+  { match: "gullas", accent: "#0c6e46", ink: "#0a5c3b", tint: "#eef6f1", tint2: "#e0efe7", border: "rgba(12,110,70,.18)", logo: "/logos/uv-gullas.png" },
+  { match: "lyceum", accent: "#8a1f2d", ink: "#731a26", tint: "#f9ecee", tint2: "#f3dde0", border: "rgba(138,31,45,.18)", logo: "/logos/lyceum.png" },
+  { match: "davao",  accent: "#2563a8", ink: "#1e528c", tint: "#e9f1fb", tint2: "#dbe8f7", border: "rgba(37,99,168,.18)", logo: "/logos/davao.png" },
+];
+const themeFor = (name?: string | null) => {
+  const n = (name || "").toLowerCase();
+  return THEMES.find((t) => n.includes(t.match)) || THEMES[0];
+};
+const mark = (name?: string | null) =>
+  (name || "?").trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+const fmtINR = (paise: number) => {
+  const r = paise / 100;
+  if (r >= 100000) return `₹${(r / 100000).toFixed(2).replace(/\.?0+$/, "")}L`;
+  if (r >= 1000) return `₹${Math.round(r / 1000)}k`;
+  return `₹${Math.round(r)}`;
+};
 
 export default function InboxPage() {
   const [board, setBoard] = useState<Board | null>(null);
@@ -23,20 +40,50 @@ export default function InboxPage() {
   const [sess, setSess] = useState<Session | null>(null);
   const [bizOpen, setBizOpen] = useState(false);
   const [switching, setSwitching] = useState(false);
+  const [meOpen, setMeOpen] = useState(false);
+  const [money, setMoney] = useState<number | null>(null);
+  const [me, setMe] = useState("Counsellor"); // replaced with the real login name after mount
   useEffect(() => {
     if (typeof window !== "undefined" && !localStorage.getItem("maya_token")) {
       location.href = "/login";
       return;
     }
+    const n = localStorage.getItem("maya_name");
+    if (n) setMe(n);
     api.sessionMe().then(setSess).catch((e) => console.error("session/me failed", e));
     const close = (e: MouseEvent) => {
-      if (!(e.target as HTMLElement).closest?.(".biz-switch")) setBizOpen(false);
+      const t = e.target as HTMLElement;
+      if (!t.closest?.(".biz-switch")) setBizOpen(false);
+      if (!t.closest?.(".me-switch")) setMeOpen(false);
     };
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
   }, []);
   const [err, setErr] = useState<string | null>(null);
   const [toast, setToast] = useState<string>("");
+
+  // redesign v1: tint the whole app to the active college + refresh the collected pill
+  useEffect(() => {
+    const t = themeFor(sess?.active_business?.display_name);
+    const r = document.documentElement.style;
+    r.setProperty("--accent", t.accent);
+    r.setProperty("--accent-ink", t.ink);
+    r.setProperty("--accent-tint", t.tint);
+    r.setProperty("--accent-tint-2", t.tint2);
+    r.setProperty("--accent-border", t.border);
+    r.setProperty("--accent-soft", t.tint);
+    r.setProperty("--accent-line", t.border);
+    let icon = document.querySelector<HTMLLinkElement>("link[rel='icon']");
+    if (!icon) {
+      icon = document.createElement("link");
+      icon.rel = "icon";
+      document.head.appendChild(icon);
+    }
+    icon.href = t.logo;
+    paymentsSummary(365)
+      .then((s) => setMoney(s.collected_paise))
+      .catch(() => setMoney(null));
+  }, [sess]);
 
   const showToast = (m: string) => {
     setToast(m);
@@ -104,8 +151,8 @@ export default function InboxPage() {
     if (!currentLead) return;
     const next = currentLead.driven_by === "human" ? "maya" : "human";
     try {
-      await api.takeover(currentLead.id, next, ME);
-      showToast(next === "human" ? "You're driving — AI off" : "AI back on");
+      await api.takeover(currentLead.id, next, me);
+      showToast(next === "human" ? "You're driving — Maya is paused" : "Maya is back on");
       await loadBoard();
       await openLead(currentLead.id);
     } catch (e: any) {
@@ -116,7 +163,7 @@ export default function InboxPage() {
   async function sendMsg(text: string) {
     if (!currentLead) return;
     try {
-      await api.send(currentLead.id, text, ME);
+      await api.send(currentLead.id, text, me);
       await openLead(currentLead.id);
     } catch (e: any) {
       showToast(String(e.message || e).slice(0, 120));
@@ -156,6 +203,10 @@ export default function InboxPage() {
           <span className="biz-switch">
             <button className="biz-pill" disabled={switching}
                     onClick={() => setBizOpen((v) => !v)}>
+              <span className="biz-mark logo">
+                <img src={themeFor(sess.active_business?.display_name).logo}
+                     alt={sess.active_business?.display_name || "college"} />
+              </span>
               {sess.active_business?.display_name || "Select college"}
               <span className="chev">{switching ? "…" : "▾"}</span>
             </button>
@@ -165,7 +216,12 @@ export default function InboxPage() {
                   <button key={b.business_id}
                           className={`biz-item ${b.business_id === sess.active_business?.business_id ? "on" : ""}`}
                           onClick={() => switchCollege(b.business_id)}>
-                    {b.display_name}
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                      <span className="biz-mark logo">
+                        <img src={themeFor(b.display_name).logo} alt={b.display_name} />
+                      </span>
+                      {b.display_name}
+                    </span>
                     {b.business_id === sess.active_business?.business_id && <span className="tick">✓</span>}
                   </button>
                 ))}
@@ -181,7 +237,35 @@ export default function InboxPage() {
         <button className={`navtab ${screen === "results" ? "on" : ""}`}
                 onClick={() => setScreen("results")}>Results</button>
         <span className="sp" />
-        <span className="me">RV</span>
+        {money != null && (
+          <button className="statpill" title="Collected across all time — tap for Results"
+                  onClick={() => setScreen("results")}>
+            <b>{fmtINR(money)}</b> collected
+          </button>
+        )}
+        <span className="me-switch">
+          <button className="me" onClick={() => setMeOpen((v) => !v)}>{mark(me)}</button>
+          {meOpen && (
+            <span className="me-menu">
+              <span className="acct">
+                <b>{me}</b>
+                <em>{sess?.role || "member"} · replies as "{me}"</em>
+              </span>
+              <button className="mi"
+                      onClick={() => { setMeOpen(false); showToast("Settings — coming soon"); }}>
+                Settings
+              </button>
+              <button className="mi"
+                      onClick={() => {
+                        localStorage.removeItem("maya_token");
+                        localStorage.removeItem("maya_name");
+                        location.href = "/login";
+                      }}>
+                Sign out
+              </button>
+            </span>
+          )}
+        </span>
       </div>
 
       {screen === "results" ? (
@@ -215,7 +299,7 @@ export default function InboxPage() {
             <ThreadPanel
               lead={currentLead}
               events={events}
-              me={ME}
+              me={me}
               onToggleAI={toggleAI}
               onSend={sendMsg}
               onBack={() => { setCurrentId(null); setCurrentLead(null); setBrainOpen(false); }}

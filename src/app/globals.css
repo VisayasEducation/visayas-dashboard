@@ -341,4 +341,48 @@ button,textarea,input{font-family:inherit}
   border-radius:7px;cursor:pointer;color:var(--ink)}
 .biz-item:hover{background:var(--sunken)}
 .biz-item.on{font-weight:600}
+
+/* ==== redesign v1 · July 2026: sections, presence, journey pill, top bar ==== */
+.sec{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);padding:14px 18px 6px}
+.sec.you{color:var(--ink)}
+.sec .sn{font-weight:600;color:var(--ink-4)}
+.sec .needdot{width:6px;height:6px;border-radius:50%;background:var(--amber)}
+.reason{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;color:var(--ink);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reason::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--amber);flex:0 0 auto}
+.r2{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:2px}
+.r2 .rsnip{margin:0}
+.tok{font-size:11px;color:var(--ink-3);font-weight:500;flex:0 0 auto;white-space:nowrap}
+.row.muted{opacity:.55}
+.row.muted:hover{opacity:.85}
+.biz-mark{width:20px;height:20px;border-radius:6px;color:#fff;display:inline-grid;place-items:center;font-size:9.5px;font-weight:700;flex:0 0 auto}
+.statpill{display:inline-flex;align-items:baseline;gap:5px;font-size:12.5px;color:var(--ink-2);background:var(--sunken);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;cursor:pointer;font-family:inherit}
+.statpill b{font-weight:700;color:var(--ink)}
+.statpill:hover{background:var(--accent-tint)}
+.me-switch{position:relative}
+.me-switch .me{border:none;cursor:pointer;font-family:inherit}
+.me-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:230px;z-index:50;background:#fff;border:1px solid var(--hair);border-radius:12px;box-shadow:0 8px 24px -8px rgba(0,0,0,.18);padding:6px;display:flex;flex-direction:column}
+.me-menu .acct{display:flex;flex-direction:column;gap:1px;padding:10px 10px 11px;border-bottom:1px solid var(--hair-2);margin-bottom:4px}
+.me-menu .acct b{font-size:13.5px;font-weight:700}
+.me-menu .acct em{font-style:normal;font-size:11.5px;color:var(--ink-3)}
+.me-menu .mi{text-align:left;font-size:13px;color:var(--ink);padding:8px 10px;border:0;background:transparent;border-radius:8px;cursor:pointer;font-family:inherit}
+.me-menu .mi:hover{background:var(--sunken)}
+.pdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);vertical-align:1px;animation:pulse 2.4s infinite}
+.pdot.off{background:var(--violet);animation:none}
+.pdot.closed{background:var(--ink-4);animation:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.lk{color:var(--accent-ink);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.thread-x{display:inline-grid;place-items:center;width:32px;height:32px;flex:0 0 auto;border:1px solid var(--hair);background:var(--surface);border-radius:8px;cursor:pointer;font-size:13px;color:var(--ink-2)}
+.thread-x:hover{color:var(--ink)}
+.bi-stagepill{font-size:11px;font-weight:600;padding:4px 11px;border-radius:999px;background:var(--accent-tint);color:var(--accent-ink);border:1px solid var(--accent-border)}
+.bi-stagepill.docs{background:var(--amber-tint);color:var(--amber);border-color:var(--amber-border)}
+.bi-stagepill.noa{background:var(--violet-tint);color:var(--violet);border-color:var(--violet-border)}
+.bi-stagepill.payment_due{background:var(--rose-tint);color:var(--rose);border-color:var(--rose-border)}
+.bi-stagepill.new{background:var(--blue-tint);color:var(--blue);border-color:var(--blue-border)}
+.bi-stagepill.converted{background:var(--sunken);color:var(--ink-2);border-color:var(--hair)}
+.bi-meter{height:5px;border-radius:3px;background:var(--hair);overflow:hidden;margin-top:10px}
+.bi-meter span{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
+@media (max-width:860px){.statpill{display:none}.thread-x{display:none}}
+/* real college seals in the switcher (addendum) */
+.biz-mark.logo{background:#fff;border:1px solid var(--hair);overflow:hidden}
+.biz-mark.logo img{width:15px;height:15px;object-fit:contain;display:block}
 .biz-item .tick{color:var(--accent);font-size:12px}
