@@ -7,12 +7,12 @@ const STAGE_RAIL: [string, string][] = [
 ];
 const STAGE_DESC: Record<string, string> = {
   new: "Just reached out. Maya is greeting and learning what they need.",
-  engaged: "In conversation. Maya is helping and gathering the eligibility picture.",
-  eligible: "They can proceed. Maya is moving toward document collection.",
+  engaged: "In conversation. Maya is building the eligibility picture.",
+  eligible: "They can proceed. Maya is moving toward documents.",
   docs: "Collecting the documents for the Note of Acceptance.",
-  noa: "All documents in. Send the requisition from the banner, then wait for the NOA to come back.",
+  noa: "All documents in. Send the requisition, then wait for the NOA.",
   payment_due: "NOA ready. The booking payment secures the seat.",
-  converted: "Paid and joined. A counsellor now handles visa, travel and enrolment.",
+  converted: "Paid in full — done here. A counsellor now handles visa, travel and enrolment.",
   closed: "This conversation is closed.",
 };
 
@@ -51,6 +51,8 @@ export default function BrainPanel({
   if (!brain) return <div className="bi-empty">Select a conversation</div>;
 
   const { identity: id, state } = brain;
+  const firstName = (id.student_name || id.name || "This lead").trim().split(/\s+/)[0];
+  const stageLabel = STAGE_RAIL.find(([k]) => k === state)?.[1] || state;
   const isDocs = state === "docs" || state === "noa";
   const isPayment = state === "payment_due";
   const isConverted = state === "converted";
@@ -63,8 +65,8 @@ export default function BrainPanel({
   return (
     <div className={`bi ${open ? "open" : ""}`}>
       <div className="bi-head">
-        <span className="bi-title">Lead intelligence</span>
-        <span className="bi-state">state · {state}</span>
+        <span className="bi-title">{firstName}&apos;s journey</span>
+        <span className={`bi-stagepill ${state}`}>{stageLabel}</span>
         {onClose && <button className="bi-close" onClick={onClose} aria-label="Close">✕</button>}
       </div>
 
@@ -73,6 +75,9 @@ export default function BrainPanel({
         <div className="bi-sub"><span>Stage</span></div>
         <StageRail state={state} />
         <div className="bi-stagedesc">{STAGE_DESC[state] || ""}</div>
+        <div className="bi-meter">
+          <span style={{ width: `${Math.round(((STAGE_RAIL.findIndex(([k]) => k === state) + 1) / STAGE_RAIL.length) * 100)}%` }} />
+        </div>
       </div>
 
       {/* identity */}
@@ -173,7 +178,7 @@ export default function BrainPanel({
               {d.flag && leadId && (
                 <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
                   <button onClick={async () => {
-                      const who = prompt("Verifying as (your name):") || "";
+                      const who = prompt("Verifying as (your name):", localStorage.getItem("maya_name") || "") || "";
                       if (!who.trim()) return;
                       await verifyFlaggedDoc(leadId, d.key, true, who.trim());
                       location.reload(); }}
@@ -181,7 +186,7 @@ export default function BrainPanel({
                              borderRadius: 7, border: "none", background: "#0b6b46",
                              color: "#fff", cursor: "pointer" }}>Verify</button>
                   <button onClick={async () => {
-                      const who = prompt("Rejecting as (your name):") || "";
+                      const who = prompt("Rejecting as (your name):", localStorage.getItem("maya_name") || "") || "";
                       if (!who.trim()) return;
                       await verifyFlaggedDoc(leadId, d.key, false, who.trim());
                       location.reload(); }}

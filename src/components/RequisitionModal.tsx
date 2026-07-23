@@ -30,7 +30,8 @@ export default function RequisitionModal({
     setSending(true);
     try {
       await api.sendRequisition(leadId, {
-        to, cc, subject, body, by: "dashboard",
+        to, cc, subject, body,
+        by: (typeof window !== "undefined" && localStorage.getItem("maya_name")) || "dashboard",
         force: !!(r && r.files.length < 5),
       } as any);
       onSent(); onClose();
