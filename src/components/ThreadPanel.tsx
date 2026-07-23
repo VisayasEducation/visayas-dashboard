@@ -196,7 +196,7 @@ export default function ThreadPanel({
     <>
       <div className="thread-head">
         <button className="thread-back" onClick={onBack} aria-label="Back to list">←</button>
-        <div className="fp" style={{ background: color(lead.id) }}>
+        <div className="fp" style={{ background: `${color(lead.id)}1f`, color: color(lead.id) }}>
           {initials(lead.name, lead.phone)}
         </div>
         <div className="th-id">
@@ -208,12 +208,8 @@ export default function ThreadPanel({
               : driving
               ? "You're driving — Maya is paused"
               : `Maya is replying · window closes in ${fmtLeft(lead.window_seconds_left)}`}
-            {lead.concern ? ` · concern: ${lead.concern}` : ""}
           </div>
         </div>
-        <span className={`win ${winOpen ? "open" : "closed"}`}>
-          {winOpen ? `Window · ${fmtLeft(lead.window_seconds_left)} left` : "Window closed"}
-        </span>
         <div className={`aitoggle ${driving ? "" : "on"}`} onClick={onToggleAI}
              title="Who replies to this family">
           <span className="lbl">{driving ? "You" : "Maya"}</span>

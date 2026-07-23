@@ -72,9 +72,14 @@ export default function BrainPanel({
 
       {/* stage rail */}
       <div className="bi-card">
-        <div className="bi-sub"><span>Stage</span></div>
         <StageRail state={state} />
-        <div className="bi-stagedesc">{STAGE_DESC[state] || ""}</div>
+        <div className="bi-stagedesc">
+          {state === "docs" ? (
+            <>Collecting the <b>{brain.docs.total} documents</b> for the Note of Acceptance.</>
+          ) : (
+            STAGE_DESC[state] || ""
+          )}
+        </div>
         <div className="bi-meter">
           <span style={{ width: `${Math.round(((STAGE_RAIL.findIndex(([k]) => k === state) + 1) / STAGE_RAIL.length) * 100)}%` }} />
         </div>
@@ -263,17 +268,6 @@ export default function BrainPanel({
         <PaymentsCard leadId={leadId} state={state} />
       )}
 
-      {/* gate */}
-      <div className="bi-card">
-        <div className="bi-sub">
-          <span>Gate</span>
-          <span className="bi-hint">armed from message one</span>
-        </div>
-        <div className="bi-gate">
-          <span className="gc">{brain.gate_count}</span>
-          <span>guarantee attempts on this lead</span>
-        </div>
-      </div>
     </div>
   );
 }

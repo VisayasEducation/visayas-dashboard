@@ -184,21 +184,9 @@ export default function InboxPage() {
     ? Object.values(board.board).flat().filter(isReqDue).length
     : 0;
 
-  const humanCount = board
-    ? Object.values(board.board).flat().filter((l) => l.driven_by === "human").length
-    : 0;
-  const sub = err
-    ? "error loading"
-    : board
-    ? `${board.total} open · ${humanCount} human-driven`
-    : "loading…";
-
   return (
     <div className="app">
       <div className="top">
-        <span className="brand">
-          Maya<span className="dot">·</span>Inbox
-        </span>
         {sess && sess.memberships.length > 1 ? (
           <span className="biz-switch">
             <button className="biz-pill" disabled={switching}
@@ -231,13 +219,12 @@ export default function InboxPage() {
         ) : (
           <span className="biz-label">{sess?.active_business?.display_name || "…"}</span>
         )}
-        <span className="nav-div" />
         <button className={`navtab ${screen === "chats" ? "on" : ""}`}
                 onClick={() => setScreen("chats")}>Chats</button>
         <button className={`navtab ${screen === "results" ? "on" : ""}`}
                 onClick={() => setScreen("results")}>Results</button>
         <span className="sp" />
-        {money != null && (
+        {money != null && money > 0 && (
           <button className="statpill" title="Collected across all time — tap for Results"
                   onClick={() => setScreen("results")}>
             <b>{fmtINR(money)}</b> collected
@@ -249,7 +236,7 @@ export default function InboxPage() {
             <span className="me-menu">
               <span className="acct">
                 <b>{me}</b>
-                <em>{sess?.role || "member"} · replies as "{me}"</em>
+                <em>{sess?.role || "member"}</em>
               </span>
               <button className="mi"
                       onClick={() => { setMeOpen(false); showToast("Settings — coming soon"); }}>
@@ -280,7 +267,6 @@ export default function InboxPage() {
           currentId={currentId}
           onFilter={setFilter}
           onSelect={openLead}
-          sub={sub}
         />
 
         <div className="thread-wrap">

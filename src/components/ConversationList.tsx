@@ -24,7 +24,6 @@ export default function ConversationList({
   currentId,
   onFilter,
   onSelect,
-  sub,
 }: {
   leads: Lead[];
   counts: Record<string, number>;
@@ -33,7 +32,6 @@ export default function ConversationList({
   currentId: string | null;
   onFilter: (k: string | null) => void;
   onSelect: (id: string) => void;
-  sub: string;
 }) {
   const [q, setQ] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
@@ -76,7 +74,7 @@ export default function ConversationList({
       className={`row ${currentId === l.id ? "on" : ""} ${l.state === "converted" ? "muted" : ""}`}
       onClick={() => onSelect(l.id)}
     >
-      <div className="fp" style={{ background: color(l.id) }}>
+      <div className="fp" style={{ background: `${color(l.id)}1f`, color: color(l.id) }}>
         {initials(l.name, l.phone)}
       </div>
       <div className="body">
@@ -99,17 +97,18 @@ export default function ConversationList({
   );
   return (
     <div className="list">
-      <div className="list-head">
-        <h2>Conversations</h2>
-        <div className="sub">{sub}</div>
-      </div>
       <div className="search">
-        <input
-          ref={searchRef}
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search conversations  ·  ⌘K"
-        />
+        <div className="sbox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+          </svg>
+          <input
+            ref={searchRef}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={`Search ${total} students`}
+          />
+        </div>
       </div>
       <div className="filters">
         {FILTERS.map((f) => {
