@@ -76,6 +76,13 @@ function MediaBlock({ d }: { d: any }) {
   );
 }
 
+// "19h" / "42m" left in the Meta messaging window (window_seconds_left from the backend)
+function fmtLeft(s?: number): string {
+  const v = Math.max(0, s || 0);
+  if (v >= 3600) return `${Math.floor(v / 3600)}h`;
+  return `${Math.max(1, Math.floor(v / 60))}m`;
+}
+
 export default function ThreadPanel({
   lead,
   events,
@@ -195,19 +202,25 @@ export default function ThreadPanel({
         <div className="th-id">
           <div className="th-name">{lead.name || lead.phone || "Unknown"}</div>
           <div className="th-meta">
-            {lead.phone} · {(lead.state || "new").replace(/_/g, " ")}
+            {lead.phone} · <span className={`pdot ${!winOpen ? "closed" : driving ? "off" : ""}`} />{" "}
+            {!winOpen
+              ? "Conversation window closed"
+              : driving
+              ? "You're driving — Maya is paused"
+              : `Maya is replying · window closes in ${fmtLeft(lead.window_seconds_left)}`}
             {lead.concern ? ` · concern: ${lead.concern}` : ""}
           </div>
         </div>
         <span className={`win ${winOpen ? "open" : "closed"}`}>
-          {winOpen ? "Window open" : "Window closed"}
+          {winOpen ? `Window · ${fmtLeft(lead.window_seconds_left)} left` : "Window closed"}
         </span>
-        <div className={`aitoggle ${driving ? "" : "on"}`} onClick={onToggleAI}>
-          <span className="lbl">AI</span>
+        <div className={`aitoggle ${driving ? "" : "on"}`} onClick={onToggleAI}
+             title="Who replies to this family">
+          <span className="lbl">{driving ? "You" : "Maya"}</span>
           <span className="sw" />
-          <span className="state">{driving ? "OFF · human" : "ON · Maya"}</span>
         </div>
         <button className="thread-lead" onClick={onOpenBrain}>ⓘ Lead</button>
+        <button className="thread-x" onClick={onBack} aria-label="Close conversation">✕</button>
       </div>
 
       <div className="thread" ref={threadRef} onScroll={handleScroll}>
@@ -217,11 +230,12 @@ export default function ThreadPanel({
       <div className="composer">
         {!driving ? (
           <div className="locked">
-            AI is answering this chat. Switch AI off (take over) to reply as a human.
+            Maya is answering this chat.{" "}
+            <span className="lk" onClick={onToggleAI}>Take over</span> to reply yourself.
           </div>
         ) : !winOpen ? (
           <div className="locked warn">
-            24-hour window closed — an approved template is needed (coming later).
+            Messaging window closed — an approved template is needed to restart this conversation.
           </div>
         ) : (
           <div className="cbox">
