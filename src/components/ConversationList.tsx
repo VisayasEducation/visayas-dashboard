@@ -14,7 +14,7 @@ const FILTERS: { key: string | null; label: string }[] = [
   { key: "converted", label: "Converted" },
 ];
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function ConversationList({
   leads,
@@ -36,11 +36,67 @@ export default function ConversationList({
   sub: string;
 }) {
   const [q, setQ] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
   const visible = q.trim()
     ? leads.filter((l) =>
         (l.name || "").toLowerCase().includes(q.trim().toLowerCase()) ||
         (l.phone || "").includes(q.trim()))
     : leads;
+
+  // redesign v1: the list answers "who acts next". Priority: requisition > human driving.
+  // (Flagged-document reason needs a board-endpoint field — deferred to the backend pass.)
+  const reason = (l: Lead): string | null => {
+    if (l.state === "noa" && !l.requisition_sent) return "Requisition ready to send";
+    if (l.driven_by === "human") return "You're replying — Maya is paused";
+    return null;
+  };
+  const tok = (l: Lead): string => {
+    const st = l.state || "new";
+    if (st === "docs") return `Docs ${l.docs_done ?? 0}/${l.docs_total ?? 5}`;
+    if (st === "noa") return "Awaiting NOA";
+    if (st === "payment_due") return "Payment due";
+    if (st === "converted") return "Done";
+    return st.replace(/_/g, " ");
+  };
+  const needs = visible.filter((l) => reason(l));
+  const handled = visible.filter((l) => !reason(l));
+  const Row = (l: Lead, r: string | null) => (
+    <div
+      key={l.id}
+      className={`row ${currentId === l.id ? "on" : ""} ${l.state === "converted" ? "muted" : ""}`}
+      onClick={() => onSelect(l.id)}
+    >
+      <div className="fp" style={{ background: color(l.id) }}>
+        {initials(l.name, l.phone)}
+      </div>
+      <div className="body">
+        <div className="r1">
+          <span className="rname">{l.name || l.phone || "Unknown"}</span>
+          <span className="rtime">{timeAgo(l.updated_at)}</span>
+        </div>
+        {r ? (
+          <div className="reason">{r}</div>
+        ) : (
+          <div className="r2">
+            <span className="rsnip">
+              {l.concern ? `Concern: ${l.concern}` : l.city || l.source || "—"}
+            </span>
+            <span className="tok">{tok(l)}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
   return (
     <div className="list">
       <div className="list-head">
@@ -49,9 +105,10 @@ export default function ConversationList({
       </div>
       <div className="search">
         <input
+          ref={searchRef}
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search conversations"
+          placeholder="Search conversations  ·  ⌘K"
         />
       </div>
       <div className="filters">
@@ -70,41 +127,18 @@ export default function ConversationList({
       </div>
       <div className="rows">
         {visible.length === 0 && <div className="spin">No conversations here.</div>}
-        {visible.map((l) => {
-          const st = l.state || "new";
-          return (
-            <div
-              key={l.id}
-              className={`row ${currentId === l.id ? "on" : ""}`}
-              onClick={() => onSelect(l.id)}
-            >
-              <div className="fp" style={{ background: color(l.id) }}>
-                {initials(l.name, l.phone)}
-              </div>
-              <div className="body">
-                <div className="r1">
-                  <span className="rname">{l.name || l.phone || "Unknown"}</span>
-                  <span className="rtime">{timeAgo(l.updated_at)}</span>
-                </div>
-                <div className="rsnip">
-                  {l.concern ? `Concern: ${l.concern}` : l.city || l.source || "—"}
-                </div>
-                <div>
-                  {st === "noa" && !l.requisition_sent ? (
-                    <span className="rtag" style={{ background: "#eef2fb", color: "#3b5bdb" }}>requisition due</span>
-                  ) : (
-                    <span className={`rtag ${st}`}>{st.replace(/_/g, " ")}</span>
-                  )}
-                  {l.driven_by === "human" ? (
-                    <span className="rdrv human">● human</span>
-                  ) : (
-                    <span className="rdrv">Maya</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {needs.length > 0 && (
+          <div className="sec you">
+            <span className="needdot" />Needs you <span className="sn">{needs.length}</span>
+          </div>
+        )}
+        {needs.map((l) => Row(l, reason(l)))}
+        {handled.length > 0 && (
+          <div className="sec">
+            Maya&apos;s handling <span className="sn">{handled.length}</span>
+          </div>
+        )}
+        {handled.map((l) => Row(l, null))}
       </div>
     </div>
   );
