@@ -82,7 +82,7 @@ export default function InboxPage() {
     icon.href = t.logo;
     paymentsSummary(365)
       .then((s) => setMoney(s.collected_paise))
-      .catch(() => setMoney(null));
+      .catch(() => setMoney(0)); // pill is the only Results entry on desktop — show ₹0, never vanish
   }, [sess]);
 
   const showToast = (m: string) => {
@@ -219,12 +219,8 @@ export default function InboxPage() {
         ) : (
           <span className="biz-label">{sess?.active_business?.display_name || "…"}</span>
         )}
-        <button className={`navtab ${screen === "chats" ? "on" : ""}`}
-                onClick={() => setScreen("chats")}>Chats</button>
-        <button className={`navtab ${screen === "results" ? "on" : ""}`}
-                onClick={() => setScreen("results")}>Results</button>
         <span className="sp" />
-        {money != null && money > 0 && (
+        {money != null && (
           <button className="statpill" title="Collected across all time — tap for Results"
                   onClick={() => setScreen("results")}>
             <b>{fmtINR(money)}</b> collected
@@ -256,7 +252,10 @@ export default function InboxPage() {
       </div>
 
       {screen === "results" ? (
-        <ResultsScreen onStage={(s) => { setFilter(s); setScreen("chats"); }} />
+        <div className="results-wrap">
+          <button className="backlink" onClick={() => setScreen("chats")}>← Back to chats</button>
+          <ResultsScreen onStage={(s) => { setFilter(s); setScreen("chats"); }} />
+        </div>
       ) : (
       <div className={`main ${currentLead ? "with-brain" : ""}`}>
         <ConversationList

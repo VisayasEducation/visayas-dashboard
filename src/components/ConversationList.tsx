@@ -1,6 +1,6 @@
 "use client";
 import { Lead } from "@/lib/api";
-import { initials, timeAgo, color } from "@/lib/ui";
+import { timeAgo } from "@/lib/ui";
 
 const FILTERS: { key: string | null; label: string }[] = [
   { key: null, label: "All" },
@@ -74,9 +74,6 @@ export default function ConversationList({
       className={`row ${currentId === l.id ? "on" : ""} ${l.state === "converted" ? "muted" : ""}`}
       onClick={() => onSelect(l.id)}
     >
-      <div className="fp" style={{ background: `${color(l.id)}1f`, color: color(l.id) }}>
-        {initials(l.name, l.phone)}
-      </div>
       <div className="body">
         <div className="r1">
           <span className="rname">{l.name || l.phone || "Unknown"}</span>
