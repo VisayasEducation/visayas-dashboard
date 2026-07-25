@@ -9,8 +9,8 @@ import { getSettings, saveRequisition, CollegeSettings } from "@/lib/api";
 const DOCS = ["10th marksheet", "12th marksheet", "NEET scorecard", "NEET admit card", "Passport/Aadhaar"];
 
 export default function SettingsScreen({
-  me, role, college, onExport,
-}: { me: string; role: string; college: string; onExport: () => void }) {
+  me, role, college, logoUrl, onExport,
+}: { me: string; role: string; college: string; logoUrl?: string | null; onExport: () => void }) {
   const [s, setS] = useState<CollegeSettings | null>(null);
   const [to, setTo] = useState(""); const [cc, setCc] = useState("");
   const [dirty, setDirty] = useState(false); const [saving, setSaving] = useState(false);
@@ -53,10 +53,12 @@ export default function SettingsScreen({
         <Card t="College" d="Identity Maya carries for this college.">
           <div className="srow" style={{ alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span className="avlogo" style={{ borderRadius: 999 }}>{mark}</span>
-              <div className="a"><b>{college || "This college"}</b><em>Logo, name, and theme color</em></div>
+              <span className="setlogo">
+                {logoUrl ? <img src={logoUrl} alt={college || "college"} /> : <b>{mark}</b>}
+              </span>
+              <div className="a"><b>{college || "This college"}</b><em>The crest families see</em></div>
             </div>
-            <div className="b"><button className="btn2" disabled title="Coming soon">Edit</button><Soon /></div>
+            <div className="b"><button className="btn2" disabled title="Coming soon">Change logo</button><Soon /></div>
           </div>
           <Row t="WhatsApp number" d="The number families message">
             <span className="val">{s?.phone_number || "\u2014"}</span><span className="live">Live</span>

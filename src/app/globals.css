@@ -383,7 +383,7 @@ button,textarea,input{font-family:inherit}
 .bi-meter span{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
 @media (max-width:860px){.statpill{display:none}.thread-x{display:none}}
 /* real college seals in the switcher (addendum) */
-.biz-mark.logo{background:var(--accent-tint);border:1px solid var(--accent-border);border-radius:999px !important;overflow:hidden}
+.biz-mark.logo{background:#fff;border:1px solid var(--hair);border-radius:999px !important;overflow:hidden}
 .biz-mark.logo img{width:15px;height:15px;object-fit:contain;display:block}
 
 /* ==== polish v2 · July 2026: prototype-match pass ==== */
@@ -553,3 +553,8 @@ button,textarea,input{font-family:inherit}
 .setin{width:230px;max-width:46vw;background:var(--surface);border:1px solid var(--hair);border-radius:9px;padding:7px 11px;font-size:13px;color:var(--ink);font-family:inherit;outline:none}
 .setin:focus{border-color:var(--accent-border)}
 .saverow{display:flex;justify-content:flex-end;gap:8px;padding:10px 0 12px}
+
+/* v4.2.1: settings college logo — real crest, plain white circle, no tint ring */
+.setlogo{width:40px;height:40px;flex:0 0 40px;border-radius:999px;background:#fff;border:1px solid var(--hair);overflow:hidden;display:inline-grid;place-items:center}
+.setlogo img{width:40px;height:40px;object-fit:contain;display:block}
+.setlogo b{font-size:13px;font-weight:800;color:var(--ink-2)}

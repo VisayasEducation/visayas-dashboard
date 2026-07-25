@@ -272,6 +272,7 @@ export default function InboxPage() {
             me={me}
             role={sess?.role || "member"}
             college={sess?.active_business?.display_name || ""}
+            logoUrl={themeFor(sess?.active_business?.display_name).logo}
             onExport={() => setScreen("leads")}
           />
         </div>
