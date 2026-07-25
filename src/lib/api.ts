@@ -211,3 +211,15 @@ export const openLeadFile = async (leadId: string, kind: string) => {
 export const paymentsSummary = (days = 7) =>
   req<{ collected_paise: number; pending: number; overdue: number }>(
     `/api/payments/summary?days=${days}`);
+
+// ---- settings (v4.2): read college identity, save requisition To/Cc ----
+export type CollegeSettings = {
+  college_name: string; phone_number: string | null;
+  requisition: { to: string; cc: string; intake: string };
+  kb_sheet_url: string;
+};
+export const getSettings = () => req<CollegeSettings>(`/api/settings`);
+export const saveRequisition = (to: string, cc: string) =>
+  req<{ ok: boolean; to: string; cc: string }>(`/api/settings/requisition`, {
+    method: "PATCH", body: JSON.stringify({ to, cc }),
+  });

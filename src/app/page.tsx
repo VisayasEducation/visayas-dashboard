@@ -226,6 +226,9 @@ export default function InboxPage() {
           <button className="statpill" title="Collected across all time — tap for Results"
                   onClick={() => setScreen("results")}>
             <b>{fmtINR(money)}</b> collected
+            {(board?.counts?.["converted"] || 0) > 0 && (
+              <> {"\u00B7"} {board?.counts?.["converted"]} done</>
+            )}
           </button>
         )}
         <span className="me-switch">
@@ -285,6 +288,7 @@ export default function InboxPage() {
           onTable={() => setScreen("leads")}
         />
         <div className="thread-wrap results-pane">
+          <button className="backlink" onClick={() => setScreen("chats")}>{"\u2190"} Back to chats</button>
           <ResultsScreen onStage={(s) => { setFilter(s); setScreen("chats"); }} />
         </div>
       </div>
