@@ -137,7 +137,7 @@ export default function ThreadPanel({
 
   // group by day + render
   let lastDay = "";
-  const rows: JSX.Element[] = [];
+  const rows: React.ReactElement[] = [];
   events.forEach((ev, i) => {
     const day = new Date(ev.ts).toLocaleDateString(undefined, {
       weekday: "short",
