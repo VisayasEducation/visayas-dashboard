@@ -3,7 +3,7 @@ import { Lead } from "@/lib/api";
 import { timeAgo } from "@/lib/ui";
 
 const FILTERS: { key: string | null; label: string }[] = [
-  { key: null, label: "All" },
+  { key: null, label: "All students" },
   { key: "new", label: "New" },
   { key: "engaged", label: "Engaged" },
   { key: "eligible", label: "Eligible" },
@@ -11,7 +11,7 @@ const FILTERS: { key: string | null; label: string }[] = [
   { key: "requisition_due", label: "Requisition" },
   { key: "noa", label: "NOA" },
   { key: "payment_due", label: "Payment" },
-  { key: "converted", label: "Converted" },
+  { key: "converted", label: "Done" },
 ];
 
 import { useEffect, useRef, useState } from "react";
@@ -36,8 +36,7 @@ export default function ConversationList({
   onTable: () => void;
 }) {
   const [q, setQ] = useState("");
-  const [fOpen, setFOpen] = useState(false); // v4: filter popover replaces the chips row
-  const [needsOnly, setNeedsOnly] = useState(false);
+  const [fOpen, setFOpen] = useState(false); // v4.1: prototype popover — plain list, nonzero stages
   const searchRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -78,7 +77,7 @@ export default function ConversationList({
     if (st === "converted") return "Done";
     return st.replace(/_/g, " ");
   };
-  const shown = needsOnly ? visible.filter((l) => reason(l)) : visible;
+  const shown = visible;
   const needs = shown.filter((l) => reason(l));
   const handled = shown.filter((l) => !reason(l));
   const Row = (l: Lead, r: string | null) => (
@@ -124,32 +123,24 @@ export default function ConversationList({
             <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M3 15h18M9 3v18" /></svg>
         </button>
         <span className="fwrap">
-          <button className={`sq ${filter || needsOnly ? "on" : ""}`} title="Filter"
+          <button className={`sq ${filter ? "on" : ""}`} title="Filter"
                   onClick={() => setFOpen((v) => !v)}>
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M4 5h16M7 12h10M10 19h4" /></svg>
           </button>
           {fOpen && (
             <div className="fpop">
-              <div className="fp-sec">Stage</div>
-              {FILTERS.map((f) => {
+              {FILTERS.filter((f) => !f.key || (counts[f.key] || 0) > 0).map((f) => {
                 const n = f.key ? counts[f.key] || 0 : total;
+                const on = filter === f.key;
                 return (
-                  <button key={f.label} className={`fp-item ${filter === f.key ? "on" : ""}`}
+                  <button key={f.label} className={`fp-item ${on ? "on" : ""}`}
                           onClick={() => { onFilter(f.key); setFOpen(false); }}>
-                    <span>{f.label}</span><span className="fp-n">{n}</span>
+                    <span>{f.label}</span>
+                    {on ? <span className="fp-tick">✓</span> : <span className="fp-n">{n}</span>}
                   </button>
                 );
               })}
-              <div className="fp-sec">Quick</div>
-              <button className={`fp-item ${needsOnly ? "on" : ""}`}
-                      onClick={() => setNeedsOnly((v) => !v)}>
-                <span>Needs you only</span>{needsOnly ? <span className="fp-n">✓</span> : null}
-              </button>
-              <div className="fp-sec">Source</div>
-              <div className="fp-item off">
-                <span>By ad / campaign</span><span className="soon">Coming soon</span>
-              </div>
             </div>
           )}
         </span>
@@ -157,7 +148,7 @@ export default function ConversationList({
       <div className="rows">
         {shown.length === 0 && (
           <div className="spin">
-            {q.trim() || filter || needsOnly
+            {q.trim() || filter
               ? "No students here right now."
               : "Maya is ready. The first family to message will appear here."}
           </div>
@@ -170,9 +161,8 @@ export default function ConversationList({
         {needs.map((l) => Row(l, reason(l)))}
         {handled.length > 0 && (
           <div className="sec">
-            {needs.length === 0
-              ? <>Maya&apos;s handling {handled.length} on her own</>
-              : <>Maya&apos;s handling <span className="sn">{handled.length}</span></>}
+            Maya&apos;s handling <span className="sn">{handled.length}</span>
+            {needs.length === 0 ? <span className="sn">· on her own</span> : null}
           </div>
         )}
         {handled.map((l) => Row(l, null))}
