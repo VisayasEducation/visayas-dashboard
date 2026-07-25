@@ -7,6 +7,8 @@ import BrainPanel from "@/components/BrainPanel";
 import ResultsScreen from "@/components/ResultsScreen";
 import RequisitionBanner from "@/components/RequisitionBanner";
 import RequisitionModal from "@/components/RequisitionModal";
+import LeadsTable from "@/components/LeadsTable";
+import SettingsScreen from "@/components/SettingsScreen";
 
 // ---- per-college theming (redesign v1). Matched on display name; UV Gullas is the default. ----
 const THEMES = [
@@ -36,7 +38,7 @@ export default function InboxPage() {
   const [brain, setBrain] = useState<Brain | null>(null);
   const [brainOpen, setBrainOpen] = useState(false);
   const [reqOpen, setReqOpen] = useState(false);
-  const [screen, setScreen] = useState<"chats" | "results">("chats");
+  const [screen, setScreen] = useState<"chats" | "results" | "leads" | "settings">("chats");
   const [sess, setSess] = useState<Session | null>(null);
   const [bizOpen, setBizOpen] = useState(false);
   const [switching, setSwitching] = useState(false);
@@ -235,7 +237,7 @@ export default function InboxPage() {
                 <em>{sess?.role || "member"}</em>
               </span>
               <button className="mi"
-                      onClick={() => { setMeOpen(false); showToast("Settings — coming soon"); }}>
+                      onClick={() => { setMeOpen(false); setScreen("settings"); }}>
                 Settings
               </button>
               <button className="mi"
@@ -251,11 +253,41 @@ export default function InboxPage() {
         </span>
       </div>
 
-      {screen === "results" ? (
+      {screen === "leads" ? (
         <div className="results-wrap">
           <button className="backlink" onClick={() => setScreen("chats")}>← Back to chats</button>
+          <LeadsTable
+            leads={board ? Object.values(board.board).flat() : []}
+            college={sess?.active_business?.display_name || ""}
+            onOpen={(id) => { setScreen("chats"); openLead(id); }}
+          />
+        </div>
+      ) : screen === "settings" ? (
+        <div className="results-wrap">
+          <button className="backlink" onClick={() => setScreen("chats")}>← Back to chats</button>
+          <SettingsScreen
+            me={me}
+            role={sess?.role || "member"}
+            college={sess?.active_business?.display_name || ""}
+            onExport={() => setScreen("leads")}
+          />
+        </div>
+      ) : screen === "results" ? (
+      <div className="main">
+        <ConversationList
+          leads={leads}
+          counts={{ ...(board?.counts || {}), requisition_due: reqDueCount }}
+          total={board?.total || 0}
+          filter={filter}
+          currentId={currentId}
+          onFilter={setFilter}
+          onSelect={(id) => { setScreen("chats"); openLead(id); }}
+          onTable={() => setScreen("leads")}
+        />
+        <div className="thread-wrap results-pane">
           <ResultsScreen onStage={(s) => { setFilter(s); setScreen("chats"); }} />
         </div>
+      </div>
       ) : (
       <div className={`main ${currentLead ? "with-brain" : ""}`}>
         <ConversationList
@@ -266,6 +298,7 @@ export default function InboxPage() {
           currentId={currentId}
           onFilter={setFilter}
           onSelect={openLead}
+          onTable={() => setScreen("leads")}
         />
 
         <div className="thread-wrap">

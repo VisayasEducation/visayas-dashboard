@@ -24,6 +24,7 @@ export default function ConversationList({
   currentId,
   onFilter,
   onSelect,
+  onTable,
 }: {
   leads: Lead[];
   counts: Record<string, number>;
@@ -32,8 +33,11 @@ export default function ConversationList({
   currentId: string | null;
   onFilter: (k: string | null) => void;
   onSelect: (id: string) => void;
+  onTable: () => void;
 }) {
   const [q, setQ] = useState("");
+  const [fOpen, setFOpen] = useState(false); // v4: filter popover replaces the chips row
+  const [needsOnly, setNeedsOnly] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -43,7 +47,15 @@ export default function ConversationList({
       }
     };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as HTMLElement;
+      if (!t.closest?.(".fwrap")) setFOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onDown);
+    };
   }, []);
   const visible = q.trim()
     ? leads.filter((l) =>
@@ -66,8 +78,9 @@ export default function ConversationList({
     if (st === "converted") return "Done";
     return st.replace(/_/g, " ");
   };
-  const needs = visible.filter((l) => reason(l));
-  const handled = visible.filter((l) => !reason(l));
+  const shown = needsOnly ? visible.filter((l) => reason(l)) : visible;
+  const needs = shown.filter((l) => reason(l));
+  const handled = shown.filter((l) => !reason(l));
   const Row = (l: Lead, r: string | null) => (
     <div
       key={l.id}
@@ -106,23 +119,49 @@ export default function ConversationList({
             placeholder={`Search ${total} students`}
           />
         </div>
-      </div>
-      <div className="filters">
-        {FILTERS.map((f) => {
-          const n = f.key ? counts[f.key] || 0 : total;
-          return (
-            <button
-              key={f.label}
-              className={filter === f.key ? "on" : ""}
-              onClick={() => onFilter(f.key)}
-            >
-              {f.label} {n}
-            </button>
-          );
-        })}
+        <button className="sq" title="All leads table" onClick={onTable}>
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M3 15h18M9 3v18" /></svg>
+        </button>
+        <span className="fwrap">
+          <button className={`sq ${filter || needsOnly ? "on" : ""}`} title="Filter"
+                  onClick={() => setFOpen((v) => !v)}>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M4 5h16M7 12h10M10 19h4" /></svg>
+          </button>
+          {fOpen && (
+            <div className="fpop">
+              <div className="fp-sec">Stage</div>
+              {FILTERS.map((f) => {
+                const n = f.key ? counts[f.key] || 0 : total;
+                return (
+                  <button key={f.label} className={`fp-item ${filter === f.key ? "on" : ""}`}
+                          onClick={() => { onFilter(f.key); setFOpen(false); }}>
+                    <span>{f.label}</span><span className="fp-n">{n}</span>
+                  </button>
+                );
+              })}
+              <div className="fp-sec">Quick</div>
+              <button className={`fp-item ${needsOnly ? "on" : ""}`}
+                      onClick={() => setNeedsOnly((v) => !v)}>
+                <span>Needs you only</span>{needsOnly ? <span className="fp-n">✓</span> : null}
+              </button>
+              <div className="fp-sec">Source</div>
+              <div className="fp-item off">
+                <span>By ad / campaign</span><span className="soon">Coming soon</span>
+              </div>
+            </div>
+          )}
+        </span>
       </div>
       <div className="rows">
-        {visible.length === 0 && <div className="spin">No conversations here.</div>}
+        {shown.length === 0 && (
+          <div className="spin">
+            {q.trim() || filter || needsOnly
+              ? "No students here right now."
+              : "Maya is ready. The first family to message will appear here."}
+          </div>
+        )}
         {needs.length > 0 && (
           <div className="sec you">
             <span className="needdot" />Needs you <span className="sn">{needs.length}</span>
@@ -131,7 +170,9 @@ export default function ConversationList({
         {needs.map((l) => Row(l, reason(l)))}
         {handled.length > 0 && (
           <div className="sec">
-            Maya&apos;s handling <span className="sn">{handled.length}</span>
+            {needs.length === 0
+              ? <>Maya&apos;s handling {handled.length} on her own</>
+              : <>Maya&apos;s handling <span className="sn">{handled.length}</span></>}
           </div>
         )}
         {handled.map((l) => Row(l, null))}
