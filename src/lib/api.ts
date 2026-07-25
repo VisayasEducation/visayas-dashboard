@@ -20,6 +20,7 @@ export type Lead = {
   window_open: boolean;
   window_seconds_left: number;
   requisition_sent?: boolean;
+  paid_paise?: number | null;   // per-lead collected (board sends it when built)
   updated_at: string;
   created_at: string;
 };
