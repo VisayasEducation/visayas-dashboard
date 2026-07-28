@@ -67,7 +67,14 @@ export default function ResultsScreen({ onStage }: { onStage: (state: string) =>
             onClick={() => { setShowCustom(false); setDays(d); }}>{d}D</button>
         ))}
         <button className={`rr custom ${showCustom ? "on" : ""}`}
-          onClick={() => setShowCustom((v) => !v)}>Custom ▾</button>
+          onClick={() => setShowCustom((v) => !v)}
+          aria-expanded={showCustom}>Custom
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" strokeWidth="2"
+               strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
       </div>
       {showCustom && (
         <div className="r-custom">
