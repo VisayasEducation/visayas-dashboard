@@ -332,7 +332,9 @@ button,textarea,input{font-family:inherit}
   color:var(--ink);background:var(--sunken);border:1px solid var(--hair);
   border-radius:999px;padding:4px 12px;cursor:pointer}
 .biz-pill:disabled{opacity:.6;cursor:wait}
-.biz-pill .chev{font-size:10px;opacity:.7}
+.biz-pill .chev{font-size:14px;opacity:.55;margin-left:2px;line-height:1;
+  transition:transform .15s ease}
+.biz-pill[aria-expanded="true"] .chev{transform:rotate(180deg)}
 .biz-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:220px;z-index:50;
   background:#fff;border:1px solid var(--hair);border-radius:10px;
   box-shadow:0 8px 24px -8px rgba(0,0,0,.18);padding:4px;display:flex;flex-direction:column}

@@ -192,6 +192,7 @@ export default function InboxPage() {
         {sess && sess.memberships.length > 1 ? (
           <span className="biz-switch">
             <button className="biz-pill" disabled={switching}
+                    aria-expanded={bizOpen}
                     onClick={() => setBizOpen((v) => !v)}>
               <span className="biz-mark logo">
                 <img src={themeFor(sess.active_business?.display_name).logo}
