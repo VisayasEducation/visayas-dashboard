@@ -13,16 +13,19 @@ const WORDS = ["", "one", "two", "three", "four", "five", "six", "seven", "eight
 
 export default function ResultsScreen({ onStage }: { onStage: (state: string) => void }) {
   const [data, setData] = useState<any>(null);
+  const [loadErr, setLoadErr] = useState(false);
   const [days, setDays] = useState(90);
   const [showCustom, setShowCustom] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
   const load = useCallback((d: number, f?: string, t?: string) => {
-    api.analytics(d, f, t).then(setData).catch(() => {});
+    api.analytics(d, f, t).then((r) => { setData(r); setLoadErr(false); })
+      .catch(() => setLoadErr(true));
   }, []);
   useEffect(() => { load(days); }, [days, load]);
 
+  if (loadErr) return <div className="empty">Couldn&apos;t load results. Try again in a moment.</div>;
   if (!data) return <div className="empty">Loading results…</div>;
 
   const counts: Record<string, number> = {};

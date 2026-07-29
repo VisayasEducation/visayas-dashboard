@@ -155,7 +155,7 @@ export const api = {
     ),
   downloadDocs: async (id: string, name: string) => {
     const res = await fetch(`${API_BASE}/api/leads/${id}/documents.zip`, { headers: headers() });
-    if (!res.ok) return;
+    if (!res.ok) throw new Error(`Download failed (${res.status})`);
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

@@ -155,7 +155,8 @@ export default function BrainPanel({
             <span className="dl-wrap">
               {leadId && brain.docs.done > 0 && (
                 <button className="dl-btn"
-                        onClick={() => api.downloadDocs(leadId, id.name || "lead")}>⬇ Download</button>
+                        onClick={() => api.downloadDocs(leadId, id.name || "lead")
+                          .catch(() => alert("Couldn't download the documents. Try again."))}>⬇ Download</button>
               )}
               <span className="bi-hint">{brain.docs.done} of {brain.docs.total}</span>
             </span>
@@ -228,18 +229,20 @@ export default function BrainPanel({
             <span>NOA vault</span>
             <span className="bi-hint">private · R2</span>
           </div>
-          <div className="bi-check done">
-            <span className="dot">✓</span>
+          <div className={`bi-check ${isPayment || isConverted ? "done" : ""}`}>
+            <span className="dot">{isPayment || isConverted ? "✓" : ""}</span>
             <span className="lbl">
               Stamped copy
-              <span className="val">{isPayment || isConverted ? "Sent to family" : "Ready"}</span>
+              <span className="val">{isConverted ? "Sent to family" : isPayment ? "Ready" : "Waiting for NOA"}</span>
             </span>
-            <button
-              onClick={() => openLeadFile(leadId, "noa_copy")}
-              style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700,
-                       padding: "3px 8px", borderRadius: 6,
-                       border: "1px solid #d3e6dc", background: "#eef6f1",
-                       color: "#0b6b46", cursor: "pointer" }}>View</button>
+            {(isPayment || isConverted) && (
+              <button
+                onClick={() => openLeadFile(leadId, "noa_copy")}
+                style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700,
+                         padding: "3px 8px", borderRadius: 6,
+                         border: "1px solid #d3e6dc", background: "#eef6f1",
+                         color: "#0b6b46", cursor: "pointer" }}>View</button>
+            )}
           </div>
           <div className={`bi-check ${isConverted ? "done" : ""}`}>
             <span className="dot">{isConverted ? "✓" : ""}</span>
