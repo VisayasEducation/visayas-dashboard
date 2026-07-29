@@ -84,7 +84,7 @@ export default function InboxPage() {
     icon.href = t.logo;
     paymentsSummary(365)
       .then((s) => setMoney(s.collected_paise))
-      .catch(() => setMoney(0)); // pill is the only Results entry on desktop — show ₹0, never vanish
+      .catch(() => { setMoney(null); showToast("Couldn't load payments"); });
   }, [sess]);
 
   const showToast = (m: string) => {
@@ -231,15 +231,14 @@ export default function InboxPage() {
           <span className="biz-label">{sess?.active_business?.display_name || "…"}</span>
         )}
         <span className="sp" />
-        {money != null && (
-          <button className="statpill" title="Collected across all time — tap for Results"
-                  onClick={() => setScreen("results")}>
-            <b>{fmtINR(money)}</b> collected
-            {(board?.counts?.["converted"] || 0) > 0 && (
-              <> {"\u00B7"} {board?.counts?.["converted"]} done</>
-            )}
-          </button>
-        )}
+        <button className="statpill" title="Collected across all time — tap for Results"
+                onClick={() => setScreen("results")}>
+          {money == null ? <span style={{color:"var(--ink-3)"}}>Couldn&apos;t load</span>
+                         : <><b>{fmtINR(money)}</b> collected</>}
+          {money != null && (board?.counts?.["converted"] || 0) > 0 && (
+            <> {"\u00B7"} {board?.counts?.["converted"]} done</>
+          )}
+        </button>
         <span className="me-switch">
           <button className="me" onClick={() => setMeOpen((v) => !v)}>{mark(me)}</button>
           {meOpen && (
@@ -278,6 +277,7 @@ export default function InboxPage() {
         <div className="results-wrap">
           <button className="backlink" onClick={() => setScreen("chats")}>← Back to chats</button>
           <SettingsScreen
+            key={sess?.active_business?.business_id}
             me={me}
             role={sess?.role || "member"}
             college={sess?.active_business?.display_name || ""}

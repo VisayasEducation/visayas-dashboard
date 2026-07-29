@@ -18,7 +18,7 @@ export default function SettingsScreen({
   useEffect(() => {
     getSettings().then((d) => { setS(d); setTo(d.requisition.to); setCc(d.requisition.cc); })
       .catch(() => setNote("Couldn't load settings"));
-  }, []);
+  }, [college]);          // refetch when the college switches
   const isOwner = role === "owner";
   const save = async () => {
     if (!isOwner || saving) return;
