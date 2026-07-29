@@ -90,6 +90,9 @@ button,textarea,input{font-family:inherit}
 .msg.out .attr{color:var(--accent-ink)}
 .msg.out.human .attr{color:var(--violet)}
 .msg .tm{font-size:10px;color:var(--ink-3);margin-top:3px;text-align:right}
+.tm .tick{font-size:11px;letter-spacing:-1px;color:var(--ink-3)}
+.tm .tick.read{color:#53bdeb}   /* WhatsApp blue, deliberately not themed */
+.tm .tick.fail{color:#b0413a;letter-spacing:0;font-size:12px}
 .evline{align-self:center;font-size:11px;color:var(--ink-3);font-style:italic;padding:3px 0}
 
 .composer{padding:14px 22px;background:var(--surface);border-top:1px solid var(--hair)}

@@ -83,6 +83,14 @@ function fmtLeft(s?: number): string {
   return `${Math.max(1, Math.floor(v / 60))}m`;
 }
 
+function MsgStatus({ status }: { status?: string }) {
+  if (status === "failed") return <span className="tick fail" title="Not delivered">⚠</span>;
+  if (status === "sent") return <span className="tick" title="Sent">✓</span>;
+  if (status === "delivered") return <span className="tick" title="Delivered">✓✓</span>;
+  if (status === "read") return <span className="tick read" title="Read">✓✓</span>;
+  return null;
+}
+
 export default function ThreadPanel({
   lead,
   events,
@@ -170,7 +178,7 @@ export default function ThreadPanel({
             <div className="attr">{human || "Maya"}</div>
             {media}
             {d.body}
-            <div className="tm">{t} ✓✓</div>
+            <div className="tm">{t} <MsgStatus status={d.status} /></div>
           </div>
         );
       }
