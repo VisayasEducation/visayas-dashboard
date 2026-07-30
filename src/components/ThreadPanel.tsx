@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Lead, TimelineEvent } from "@/lib/api";
+import RequisitionBanner from "@/components/RequisitionBanner";
 import { initials, color } from "@/lib/ui";
 
 // Pull a YouTube video id out of watch?v=, youtu.be/, or /shorts/ URLs.
@@ -99,6 +100,8 @@ export default function ThreadPanel({
   onSend,
   onBack,
   onOpenBrain,
+  onOpenRequisition,
+  noaIssuedBy,
 }: {
   lead: Lead;
   events: TimelineEvent[];
@@ -107,6 +110,8 @@ export default function ThreadPanel({
   onSend: (text: string) => Promise<void>;
   onBack: () => void;
   onOpenBrain: () => void;
+  onOpenRequisition?: () => void;
+  noaIssuedBy?: "college" | "us";
 }) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -226,6 +231,11 @@ export default function ThreadPanel({
         <button className="thread-lead" onClick={onOpenBrain}>ⓘ Lead</button>
         <button className="thread-x" onClick={onBack} aria-label="Close conversation">✕</button>
       </div>
+
+      {noaIssuedBy !== "us" && lead.state === "noa" && !lead.requisition_sent
+        && onOpenRequisition && (
+        <RequisitionBanner name={lead.name} onOpen={onOpenRequisition} />
+      )}
 
       <div className="thread" ref={threadRef} onScroll={handleScroll}>
         {rows}

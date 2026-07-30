@@ -316,9 +316,6 @@ export default function InboxPage() {
         />
 
         <div className="thread-wrap">
-          {currentLead && currentLead.state === "noa" && !currentLead.requisition_sent && (
-            <RequisitionBanner name={currentLead.name} onOpen={() => setReqOpen(true)} />
-          )}
           {err && !board ? (
             <div className="empty">
               Couldn&apos;t reach the backend.
@@ -332,6 +329,8 @@ export default function InboxPage() {
               lead={currentLead}
               events={events}
               me={me}
+              onOpenRequisition={() => setReqOpen(true)}
+              noaIssuedBy={sess?.active_business?.noa_issued_by || "college"}
               onToggleAI={toggleAI}
               onSend={sendMsg}
               onBack={() => { setCurrentId(null); setCurrentLead(null); setBrainOpen(false); }}
