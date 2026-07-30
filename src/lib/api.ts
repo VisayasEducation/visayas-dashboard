@@ -75,7 +75,8 @@ export type Brain = {
   driven_by: string;
 };
 
-export type BizRef = { business_id: string; slug: string; display_name: string };
+export type BizRef = { business_id: string; slug: string; display_name: string;
+                       noa_issued_by?: "college" | "us" };
 export type Session = {
   user: { id: string; username: string; name: string };
   role: string;
@@ -140,6 +141,10 @@ export const api = {
     if (from && to) q += `&date_from=${from}&date_to=${to}`;
     return req<any>(`/api/analytics${q}`);
   },
+  noaUpload: (id: string, filename: string, pdf_base64: string, staff_name: string) =>
+    req(`/api/leads/${id}/noa/upload`,
+        { method: "POST",
+          body: JSON.stringify({ filename, pdf_base64, staff_name }) }),
   noaAction: (id: string, action: "received" | "more_docs") =>
     req<{ ok: boolean; state: string | null }>(`/api/leads/${id}/noa`, {
       method: "POST", body: JSON.stringify({ action }),

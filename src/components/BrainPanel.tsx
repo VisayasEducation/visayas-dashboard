@@ -1,5 +1,7 @@
 "use client";
+import { useState } from "react";
 import { api, Brain } from "@/lib/api";
+import UploadNoaModal from "@/components/UploadNoaModal";
 
 const STAGE_RAIL: [string, string][] = [
   ["new", "New"], ["engaged", "Engaged"], ["eligible", "Eligible"],
@@ -48,6 +50,7 @@ import { verifyFlaggedDoc, openLeadFile } from "@/lib/api";
 export default function BrainPanel({
   brain, leadId, open = false, onClose,
 }: { brain: Brain | null; leadId?: string | null; open?: boolean; onClose?: () => void }) {
+  const [uploadOpen, setUploadOpen] = useState(false);
   if (!brain) return <div className="bi-empty">Select a conversation</div>;
 
   const { identity: id, state } = brain;
@@ -210,14 +213,11 @@ export default function BrainPanel({
       {state === "noa" && leadId && (
         <div className="bi-card noa">
           <div className="bi-sub"><span>Note of Acceptance</span></div>
-          <p className="noa-hint">Send the requisition from the banner on the conversation. When the college replies, mark the NOA:</p>
+          <p className="noa-hint">Upload the letter when it arrives and the lead is
+            notified straight away.</p>
           <div className="noa-actions">
-            <button className="noa-recv"
-              onClick={async () => { await api.noaAction(leadId, "received"); location.reload(); }}>
-              NOA received</button>
-            <button className="noa-more"
-              onClick={async () => { await api.noaAction(leadId, "more_docs"); location.reload(); }}>
-              More docs needed</button>
+            <button className="noa-recv" onClick={() => setUploadOpen(true)}>
+              Upload the letter</button>
           </div>
         </div>
       )}
@@ -227,7 +227,6 @@ export default function BrainPanel({
         <div className="bi-card">
           <div className="bi-sub">
             <span>NOA vault</span>
-            <span className="bi-hint">private · R2</span>
           </div>
           <div className={`bi-check ${isPayment || isConverted ? "done" : ""}`}>
             <span className="dot">{isPayment || isConverted ? "✓" : ""}</span>
@@ -271,6 +270,19 @@ export default function BrainPanel({
         <PaymentsCard leadId={leadId} state={state} />
       )}
 
+      {uploadOpen && leadId && (
+        <UploadNoaModal
+          leadId={leadId}
+          studentName={id.student_name || id.name || "this student"}
+          parentName={id.name || ""}
+          phone={""}
+          college={""}
+          amountPaise={brain.payment?.due ?? null}
+          me={typeof window !== "undefined" ? (localStorage.getItem("maya_name") || "") : ""}
+          onClose={() => setUploadOpen(false)}
+          onDone={() => location.reload()}
+        />
+      )}
     </div>
   );
 }
