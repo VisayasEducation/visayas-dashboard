@@ -97,6 +97,7 @@ export default function InboxPage() {
       const b = await api.board();
       setBoard(b);
       setErr(null);
+      return b;
     } catch (e: any) {
       setErr(String(e.message || e).slice(0, 160));
     }
@@ -129,7 +130,15 @@ export default function InboxPage() {
       // old college's lead ids 404 under the new token — clear, then reload
       setCurrentId(null); setCurrentLead(null); setEvents([]); setBrain(null);
       setFilter(null); setBoard(null);
-      loadBoard();
+      const b = await loadBoard();
+      // Open the most recently active lead so a college lands on something useful.
+      // Desktop only — on a phone the list is hidden, so this would drop the user
+      // into a conversation they did not choose. 1000px matches the CSS breakpoint.
+      const top = b
+        ? (Object.values(b.board).flat() as Lead[])
+            .sort((x, y) => +new Date(y.updated_at) - +new Date(x.updated_at))[0]
+        : null;
+      if (top && window.innerWidth > 1000) openLead(top.id);
       showToast(`Switched to ${r.active_business?.display_name || ""}`);
     } catch (e: any) {
       showToast(String(e.message || e).slice(0, 120)); // loud, stay put
