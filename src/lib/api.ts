@@ -159,6 +159,11 @@ export const api = {
       `/api/leads/${id}/requisition/send`,
       { method: "POST", body: JSON.stringify(payload) }
     ),
+  recordOfficePayment: (id: string, body: {
+    amount_rupees: number; staff_name: string; method: string;
+    receipt_no: string; note: string; idempotency_key: string;
+  }) => req(`/api/leads/${id}/payments/manual`,
+            { method: "POST", body: JSON.stringify(body) }),
   downloadDocs: async (id: string, name: string) => {
     const res = await fetch(`${API_BASE}/api/leads/${id}/documents.zip`, { headers: headers() });
     if (!res.ok) throw new Error(`Download failed (${res.status})`);

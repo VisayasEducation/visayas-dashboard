@@ -17,6 +17,7 @@ export default function LoginPage() {
       const r = await api.login(username.trim(), pw);
       localStorage.setItem("maya_token", r.token);
       localStorage.setItem("maya_name", r.name || "");
+      localStorage.setItem("maya_username", r.username || "");
       location.href = "/";
     } catch (e: any) {
       const msg = String(e?.message || "").toLowerCase();

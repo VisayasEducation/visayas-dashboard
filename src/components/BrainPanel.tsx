@@ -45,15 +45,24 @@ function Row({ k, v, muted }: { k: string; v: React.ReactNode; muted?: boolean }
 }
 
 import PaymentsCard from "./PaymentsCard";
+import OfficePaymentModal from "./OfficePaymentModal";
 import { verifyFlaggedDoc, openLeadFile } from "@/lib/api";
 
 export default function BrainPanel({
   brain, leadId, open = false, onClose,
 }: { brain: Brain | null; leadId?: string | null; open?: boolean; onClose?: () => void }) {
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [officePayOpen, setOfficePayOpen] = useState(false);
   if (!brain) return <div className="bi-empty">Select a conversation</div>;
 
   const { identity: id, state } = brain;
+  // The backend needs at least 2 characters. Fall back to the username so a
+  // missing display name can never silently break Accept, Reject or a payment.
+  const me = typeof window !== "undefined"
+    ? (localStorage.getItem("maya_name")
+       || localStorage.getItem("maya_username")
+       || "dashboard")
+    : "dashboard";
   const firstName = (id.student_name || id.name || "This lead").trim().split(/\s+/)[0];
   const stageLabel = STAGE_RAIL.find(([k]) => k === state)?.[1] || state;
   const isDocs = state === "docs" || state === "noa";
@@ -170,9 +179,8 @@ export default function BrainPanel({
                 {d.flag ? "!" : d.done ? "✓" : ""}</span>
               <span className="lbl">
                 {d.label}
-                {d.flag && <span style={{ display: "block", fontSize: 11,
-                  color: "#b45309", fontWeight: 600 }}>
-                  Needs a look — {d.flag.reason || "flagged"}</span>}
+                {d.flag && <span className="doc-flag-note">
+                  This document was marked suspicious by Maya</span>}
               </span>
               {d.done && !d.flag && leadId && (
                 <button
@@ -185,24 +193,13 @@ export default function BrainPanel({
                 </button>
               )}
               {d.flag && leadId && (
-                <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
-                  <button onClick={async () => {
-                      const who = prompt("Verifying as (your name):", localStorage.getItem("maya_name") || "") || "";
-                      if (!who.trim()) return;
-                      await verifyFlaggedDoc(leadId, d.key, true, who.trim());
-                      location.reload(); }}
-                    style={{ fontSize: 11, fontWeight: 700, padding: "4px 9px",
-                             borderRadius: 7, border: "none", background: "#0b6b46",
-                             color: "#fff", cursor: "pointer" }}>Verify</button>
-                  <button onClick={async () => {
-                      const who = prompt("Rejecting as (your name):", localStorage.getItem("maya_name") || "") || "";
-                      if (!who.trim()) return;
-                      await verifyFlaggedDoc(leadId, d.key, false, who.trim());
-                      location.reload(); }}
-                    style={{ fontSize: 11, fontWeight: 700, padding: "4px 9px",
-                             borderRadius: 7, border: "1px solid #e7e5e4",
-                             background: "#fff", color: "#b3372f",
-                             cursor: "pointer" }}>Reject</button>
+                <span className="doc-flag-actions">
+                  <button className="doc-accept" onClick={async () => {
+                      await verifyFlaggedDoc(leadId, d.key, true, me);
+                      location.reload(); }}>Accept</button>
+                  <button className="doc-reject" onClick={async () => {
+                      await verifyFlaggedDoc(leadId, d.key, false, me);
+                      location.reload(); }}>Reject</button>
                 </span>
               )}
             </div>
@@ -267,7 +264,18 @@ export default function BrainPanel({
 
       {/* payment / converted */}
       {(isPayment || isConverted) && leadId && (
-        <PaymentsCard leadId={leadId} state={state} />
+        <PaymentsCard leadId={leadId} state={state}
+                     onRecordPayment={() => setOfficePayOpen(true)} />
+      )}
+
+      {officePayOpen && leadId && (
+        <OfficePaymentModal
+          leadId={leadId}
+          duePaise={brain?.payment?.due ?? null}
+          me={me}
+          onClose={() => setOfficePayOpen(false)}
+          onDone={() => location.reload()}
+        />
       )}
 
       {uploadOpen && leadId && (
@@ -278,7 +286,7 @@ export default function BrainPanel({
           phone={""}
           college={""}
           amountPaise={brain.payment?.due ?? null}
-          me={typeof window !== "undefined" ? (localStorage.getItem("maya_name") || "") : ""}
+          me={me}
           onClose={() => setUploadOpen(false)}
           onDone={() => location.reload()}
         />
