@@ -245,7 +245,13 @@ export default function InboxPage() {
             )}
           </span>
         ) : (
-          <span className="biz-label">{sess?.active_business?.display_name || "…"}</span>
+          <span className="biz-pill nosw">
+            <span className="biz-mark logo">
+              <img src={themeFor(sess?.active_business?.display_name).logo}
+                   alt={sess?.active_business?.display_name || "college"} />
+            </span>
+            {sess?.active_business?.display_name || "…"}
+          </span>
         )}
         <span className="sp" />
         {isTech && (
