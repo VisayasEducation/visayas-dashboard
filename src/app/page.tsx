@@ -44,6 +44,7 @@ export default function InboxPage() {
   const [switching, setSwitching] = useState(false);
   const [meOpen, setMeOpen] = useState(false);
   const [money, setMoney] = useState<number | null>(null);
+  const [showTest, setShowTest] = useState(false);
   const [me, setMe] = useState("Counsellor"); // replaced with the real login name after mount
   useEffect(() => {
     if (typeof window !== "undefined" && !localStorage.getItem("maya_token")) {
@@ -63,6 +64,11 @@ export default function InboxPage() {
   }, []);
   const [err, setErr] = useState<string | null>(null);
   const [toast, setToast] = useState<string>("");
+
+  const role = sess?.role || "owner";
+  const canSwitch  = role === "owner" || role === "tech";
+  const canSettings = role === "owner" || role === "tech";
+  const isTech = role === "tech";
 
   // redesign v1: tint the whole app to the active college + refresh the collected pill
   useEffect(() => {
@@ -94,14 +100,14 @@ export default function InboxPage() {
 
   const loadBoard = useCallback(async () => {
     try {
-      const b = await api.board();
+      const b = await api.board(showTest);
       setBoard(b);
       setErr(null);
       return b;
     } catch (e: any) {
       setErr(String(e.message || e).slice(0, 160));
     }
-  }, []);
+  }, [showTest]);
 
   const openLead = useCallback(async (id: string) => {
     setCurrentId(id);
@@ -200,23 +206,26 @@ export default function InboxPage() {
       <div className="top">
         {sess && sess.memberships.length > 1 ? (
           <span className="biz-switch">
-            <button className="biz-pill" disabled={switching}
+            <button className="biz-pill" disabled={switching || !canSwitch}
                     aria-expanded={bizOpen}
-                    onClick={() => setBizOpen((v) => !v)}>
+                    style={canSwitch ? undefined : { cursor: "default" }}
+                    onClick={() => canSwitch && setBizOpen((v) => !v)}>
               <span className="biz-mark logo">
                 <img src={themeFor(sess.active_business?.display_name).logo}
                      alt={sess.active_business?.display_name || "college"} />
               </span>
               {sess.active_business?.display_name || "Select college"}
-              <span className="chev" aria-hidden="true">
-                {switching ? "…" : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                       stroke="currentColor" strokeWidth="2"
-                       strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
-                )}
-              </span>
+              {canSwitch && (
+                <span className="chev" aria-hidden="true">
+                  {switching ? "…" : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" strokeWidth="2"
+                         strokeLinecap="round" strokeLinejoin="round">
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  )}
+                </span>
+              )}
             </button>
             {bizOpen && (
               <span className="biz-menu">
@@ -240,6 +249,14 @@ export default function InboxPage() {
           <span className="biz-label">{sess?.active_business?.display_name || "…"}</span>
         )}
         <span className="sp" />
+        {isTech && (
+          <button className="statpill" onClick={() => { setShowTest(!showTest); }}
+                  title="Show test leads instead of real ones"
+                  style={showTest ? { background: "#fdf3e1", borderColor: "#e6c98a",
+                                      color: "#8a6410" } : undefined}>
+            {showTest ? "Showing test leads" : "Test leads"}
+          </button>
+        )}
         <button className="statpill" title="Collected across all time — tap for Results"
                 onClick={() => setScreen("results")}>
           {money == null ? <span style={{color:"var(--ink-3)"}}>Couldn&apos;t load</span>
@@ -256,10 +273,12 @@ export default function InboxPage() {
                 <b>{me}</b>
                 <em>{sess?.role || "member"}</em>
               </span>
-              <button className="mi"
-                      onClick={() => { setMeOpen(false); setScreen("settings"); }}>
-                Settings
-              </button>
+              {canSettings && (
+                <button className="mi"
+                        onClick={() => { setMeOpen(false); setScreen("settings"); }}>
+                  Settings
+                </button>
+              )}
               <button className="mi"
                       onClick={() => {
                         localStorage.removeItem("maya_token");

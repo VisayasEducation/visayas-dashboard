@@ -79,7 +79,7 @@ export type BizRef = { business_id: string; slug: string; display_name: string;
                        noa_issued_by?: "college" | "us" };
 export type Session = {
   user: { id: string; username: string; name: string };
-  role: string;
+  role: "owner" | "counsellor" | "tech";
   active_business: BizRef | null;
   memberships: (BizRef & { role: string })[];
 };
@@ -121,7 +121,8 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ business_id }),
     }),
-  board: () => req<Board>(`/api/leads?business_id=${BUSINESS_ID}`),
+  board: (includeTest = false) =>
+    req<Board>(`/api/leads?business_id=${BUSINESS_ID}${includeTest ? "&include_test=true" : ""}`),
   detail: (id: string) => req<{ lead: Lead }>(`/api/leads/${id}`),
   timeline: (id: string) =>
     req<{ lead_id: string; events: TimelineEvent[] }>(`/api/leads/${id}/timeline`),
