@@ -248,7 +248,8 @@ button,textarea,input{font-family:inherit}
 .login-err{display:flex;align-items:center;gap:9px;font-size:12.5px;color:#a1443b;background:#faece9;
   border:1px solid #eccdc8;border-radius:10px;padding:10px 13px;margin-bottom:18px}
 /* ---- top nav: muted workspace label + tabs ---- */
-.biz-label{font-size:13px;font-weight:500;color:var(--ink-3,#8a958e)}
+.biz-label{font-size:13px;font-weight:500;color:var(--ink-3,#8a958e);
+  display:inline-flex;align-items:center;gap:10px}
 .nav-div{width:1px;height:20px;background:var(--hair,#e7ebe7);margin:0 4px}
 .navtab{font-size:14px;font-weight:600;color:var(--ink-3,#8a958e);background:none;border:none;padding:8px 15px;border-radius:9px;cursor:pointer;font-family:inherit}
 .navtab:hover{background:var(--surface,#fafbfa);color:var(--ink-2,#54625b)}
@@ -394,8 +395,6 @@ button,textarea,input{font-family:inherit}
 /* ==== polish v2 · July 2026: prototype-match pass ==== */
 .biz-pill{background:none;border:none;font-size:15px;font-weight:700;letter-spacing:-.02em;color:var(--ink);gap:10px;padding:6px 10px;border-radius:10px}
 .biz-pill:hover{background:var(--sunken)}
-.biz-pill.nosw{cursor:default}
-.biz-pill.nosw:hover{background:none}
 .biz-mark.logo{width:28px;height:28px;border-radius:8px}
 .biz-mark.logo img{width:20px;height:20px}
 .biz-item .biz-mark.logo{width:24px;height:24px;border-radius:7px}
