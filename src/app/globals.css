@@ -394,6 +394,8 @@ button,textarea,input{font-family:inherit}
 /* ==== polish v2 · July 2026: prototype-match pass ==== */
 .biz-pill{background:none;border:none;font-size:15px;font-weight:700;letter-spacing:-.02em;color:var(--ink);gap:10px;padding:6px 10px;border-radius:10px}
 .biz-pill:hover{background:var(--sunken)}
+.biz-pill.nosw{cursor:default}
+.biz-pill.nosw:hover{background:none}
 .biz-mark.logo{width:28px;height:28px;border-radius:8px}
 .biz-mark.logo img{width:20px;height:20px}
 .biz-item .biz-mark.logo{width:24px;height:24px;border-radius:7px}

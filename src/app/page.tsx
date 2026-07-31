@@ -206,10 +206,9 @@ export default function InboxPage() {
       <div className="top">
         {sess && sess.memberships.length > 1 ? (
           <span className="biz-switch">
-            <button className="biz-pill" disabled={switching || !canSwitch}
-                    aria-expanded={bizOpen}
-                    style={canSwitch ? undefined : { cursor: "default" }}
-                    onClick={() => canSwitch && setBizOpen((v) => !v)}>
+            <button className={`biz-pill${canSwitch ? "" : " nosw"}`}
+                    disabled={switching}
+                    onClick={() => { if (canSwitch) setBizOpen((v) => !v); }}>
               <span className="biz-mark logo">
                 <img src={themeFor(sess.active_business?.display_name).logo}
                      alt={sess.active_business?.display_name || "college"} />
