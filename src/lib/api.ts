@@ -234,3 +234,19 @@ export const saveRequisition = (to: string, cc: string) =>
   req<{ ok: boolean; to: string; cc: string }>(`/api/settings/requisition`, {
     method: "PATCH", body: JSON.stringify({ to, cc }),
   });
+
+// ---- team ----
+export type TeamMember = {
+  id: string; username: string; name: string; role: string;
+  is_active: boolean; slug: string | null; college: string | null;
+};
+export const listTeam = () => req<{ members: TeamMember[] }>(`/api/team`);
+export const changePassword = (user_id: string, new_password: string) =>
+  req<{ ok: boolean }>(`/api/team/password`, {
+    method: "POST", body: JSON.stringify({ user_id, new_password }),
+  });
+export const addCounsellor = (body: {
+  name: string; username: string; password: string; phone: string; business_id: string;
+}) => req<{ ok: boolean; id: string }>(`/api/team/counsellor`, {
+  method: "POST", body: JSON.stringify(body),
+});

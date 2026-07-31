@@ -314,6 +314,7 @@ export default function InboxPage() {
             me={me}
             role={sess?.role || "member"}
             college={sess?.active_business?.display_name || ""}
+            businessId={sess?.active_business?.business_id || ""}
             logoUrl={themeFor(sess?.active_business?.display_name).logo}
             onExport={() => setScreen("leads")}
           />

@@ -4,22 +4,30 @@
 // editable by owners (saved to business.config via PATCH), docs checklist is
 // the real five (display-only: no remove, no add), KB opens the actual sheet.
 import { useEffect, useState } from "react";
-import { getSettings, saveRequisition, CollegeSettings } from "@/lib/api";
+import { getSettings, saveRequisition, CollegeSettings,
+         listTeam, changePassword, type TeamMember } from "@/lib/api";
 
 const DOCS = ["10th marksheet", "12th marksheet", "NEET scorecard", "NEET admit card", "Passport/Aadhaar"];
 
 export default function SettingsScreen({
-  me, role, college, logoUrl, onExport,
-}: { me: string; role: string; college: string; logoUrl?: string | null; onExport: () => void }) {
+  me, role, college, businessId: _, logoUrl, onExport,
+}: { me: string; role: string; college: string; businessId: string;
+     logoUrl?: string | null; onExport: () => void }) {
   const [s, setS] = useState<CollegeSettings | null>(null);
   const [to, setTo] = useState(""); const [cc, setCc] = useState("");
   const [dirty, setDirty] = useState(false); const [saving, setSaving] = useState(false);
   const [note, setNote] = useState("");
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [pwTarget, setPwTarget] = useState<TeamMember | null>(null);
+  const [newPw, setNewPw] = useState(""); const [pwMsg, setPwMsg] = useState("");
   useEffect(() => {
     getSettings().then((d) => { setS(d); setTo(d.requisition.to); setCc(d.requisition.cc); })
       .catch(() => setNote("Couldn't load settings"));
-  }, [college]);          // refetch when the college switches
+    if (role === "owner" || role === "tech")
+      listTeam().then((r) => setTeam(r.members)).catch(() => {});
+  }, [college, role]);
   const isOwner = role === "owner";
+  const canManage = role === "owner" || role === "tech";
   const save = async () => {
     if (!isOwner || saving) return;
     setSaving(true); setNote("");
@@ -107,14 +115,58 @@ export default function SettingsScreen({
         </Card>
 
         <Card t="Team &amp; access" ws d="Names here are what families and logs see.">
-          <Row t={me} d={`Replies as \u201C${me}\u201D`}>
-            <span className="val" style={{ textTransform: "capitalize" }}>{role}</span>
-          </Row>
+          {team.filter((m) => m.role === "owner").map((m) => (
+            <Row key={m.id} t={m.name} d="all three colleges">
+              <span className="val" style={{ textTransform: "capitalize" }}>{m.role}</span>
+              {canManage && <button className="btn2" onClick={() => { setPwTarget(m); setNewPw(""); setPwMsg(""); }}>Change password</button>}
+            </Row>
+          ))}
+          {role === "tech" && team.filter((m) => m.role === "tech").map((m) => (
+            <Row key={m.id} t={m.name} d="tech">
+              <span className="val">Tech</span>
+              <button className="btn2" onClick={() => { setPwTarget(m); setNewPw(""); setPwMsg(""); }}>Change password</button>
+            </Row>
+          ))}
+          {team.some((m) => m.role === "counsellor") && (
+            <div className="sd" style={{ fontWeight: 600, margin: "14px 0 2px" }}>Counsellors</div>
+          )}
+          {team.filter((m) => m.role === "counsellor").map((m) => (
+            <Row key={m.id} t={m.name} d={m.college || ""}>
+              <span className="val">{m.college || "—"}</span>
+              {canManage && <button className="btn2" onClick={() => { setPwTarget(m); setNewPw(""); setPwMsg(""); }}>Change password</button>}
+            </Row>
+          ))}
           <Row t="Add counsellor" d="Name, WhatsApp, and role">
             <button className="btn2" disabled title="Coming soon">+ Add counsellor</button><Soon />
           </Row>
-          <Row t="Change password"><Soon /></Row>
         </Card>
+
+        {pwTarget && (
+          <div className="scrim" onClick={(e) => { if (e.target === e.currentTarget) setPwTarget(null); }}>
+            <div className="opay">
+              <div className="opay-h">
+                <h3>Change password</h3>
+                <button className="opay-x" onClick={() => setPwTarget(null)} aria-label="Close">✕</button>
+              </div>
+              <div className="opay-b">
+                <p style={{ fontSize: 14.5, color: "var(--ink-2)", margin: "0 0 14px" }}>
+                  New password for <b>{pwTarget.name}</b> ({pwTarget.username})</p>
+                <input className="opay-input" type="password" value={newPw}
+                       placeholder="At least 8 characters" autoFocus
+                       onChange={(e) => setNewPw(e.target.value)} />
+                {pwMsg && <div className={pwMsg.startsWith("Done") ? "sd" : "opay-err"} style={{ marginTop: 10 }}>{pwMsg}</div>}
+              </div>
+              <div className="opay-f">
+                <span />
+                <button className="opay-go" disabled={newPw.length < 8}
+                        onClick={async () => {
+                          try { await changePassword(pwTarget.id, newPw); setPwMsg("Done — they can sign in with the new password"); }
+                          catch (e: any) { setPwMsg(String(e?.message || "Failed")); }
+                        }}>Save</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <Card t="Notifications" ws d="WhatsApp pings and the daily digest.">
           <Row t="WhatsApp alerts" d="Pings for new leads and stage updates">
@@ -136,7 +188,7 @@ export default function SettingsScreen({
         </Card>
 
         <Card t="Data" d="Your leads are yours.">
-          <Row t="Export leads" d="Every lead as CSV, from the table view · no password">
+          <Row t="Export leads" d="CSV from the table view · password-protected, every export logged">
             <button className="pillbtn" onClick={onExport}>Open table {"\u2192"}</button>
           </Row>
         </Card>
