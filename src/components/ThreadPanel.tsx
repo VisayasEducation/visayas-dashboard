@@ -178,11 +178,17 @@ export default function ThreadPanel({
         );
       } else {
         const human = d.tags && d.tags.human;
+        const btns: string[] = Array.isArray(d.tags?.buttons) ? d.tags.buttons : [];
         rows.push(
           <div className={`msg out ${human ? "human" : ""}`} key={`m${i}`}>
             <div className="attr">{human || "Maya"}</div>
             {media}
             {d.body}
+            {btns.length > 0 && (
+              <div className="tpl-btns">
+                {btns.map((b, j) => <span className="tpl-btn" key={j}>{b}</span>)}
+              </div>
+            )}
             <div className="tm">{t} <MsgStatus status={d.status} /></div>
           </div>
         );
