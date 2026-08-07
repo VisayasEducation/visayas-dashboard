@@ -219,9 +219,9 @@ export const claimHandoff = (leadId: string, staff_name: string) =>
   req(`/api/leads/${leadId}/handoff/claim`,
       { method: "POST", body: JSON.stringify({ counsellor: staff_name, staff_name }) });
 
-export const reopenChat = (leadId: string, language: string, staff_name: string) =>
+export const reopenChat = (leadId: string, staff_name: string) =>
   req(`/api/leads/${leadId}/reopen`,
-      { method: "POST", body: JSON.stringify({ language, staff_name }) });
+      { method: "POST", body: JSON.stringify({ staff_name }) });
 
 export const setExpectedVisit = (leadId: string, expected_visit: string) =>
   req(`/api/leads/${leadId}/visit`, { method: "POST", body: JSON.stringify({ expected_visit }) });

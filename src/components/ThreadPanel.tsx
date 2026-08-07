@@ -293,10 +293,10 @@ export default function ThreadPanel({
           <div className="locked warn reopenrow">
             <span>Messaging window closed. Only an approved message can restart it.</span>
             <button className="reopenbtn" onClick={async () => {
-              const ta = confirm("OK for Tanglish, Cancel for English");
+              if (!confirm(`Send ${lead.name || "this family"} a message to restart the chat?`)) return;
               try {
-                await reopenChat(lead.id, ta ? "tanglish" : "english", me);
-                alert("Reopen message sent. The chat unlocks when they reply.");
+                await reopenChat(lead.id, me);
+                alert("Sent. The chat unlocks when they reply.");
                 location.reload();
               } catch (e) {
                 alert("Could not send it: " + String(e));
