@@ -243,8 +243,7 @@ export default function ThreadPanel({
         <RequisitionBanner name={lead.name} onOpen={onOpenRequisition} />
       )}
 
-      <div className="thread" ref={threadRef} onScroll={handleScroll}>
-        {lead.handoff_waiting && (
+      {lead.handoff_waiting && (
           <div className="hbanner">
             <div className="hicon" aria-hidden="true">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -278,7 +277,9 @@ export default function ThreadPanel({
               I&apos;ve got this
             </button>
           </div>
-        )}
+      )}
+
+      <div className="thread" ref={threadRef} onScroll={handleScroll}>
         {rows}
       </div>
 
@@ -289,9 +290,9 @@ export default function ThreadPanel({
             <span className="lk" onClick={onToggleAI}>Take over</span> to reply yourself.
           </div>
         ) : !winOpen ? (
-          <div className="locked warn">
-            Messaging window closed.
-            <button className="claimbtn" onClick={async () => {
+          <div className="locked warn reopenrow">
+            <span>Messaging window closed. Only an approved message can restart it.</span>
+            <button className="reopenbtn" onClick={async () => {
               const ta = confirm("OK for Tanglish, Cancel for English");
               try {
                 await reopenChat(lead.id, ta ? "tanglish" : "english", me);

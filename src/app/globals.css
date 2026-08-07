@@ -98,7 +98,7 @@ button,textarea,input{font-family:inherit}
 .composer{padding:14px 22px;background:var(--surface);border-top:1px solid var(--hair)}
 .composer .locked{font-size:12.5px;color:var(--ink-3);text-align:center;padding:8px;background:var(--sunken);border-radius:9px;border:1px dashed var(--hair)}
 .composer .locked.warn{color:var(--rose);border-color:var(--rose-border);background:var(--rose-tint)}
-.hbanner{display:flex;align-items:center;gap:14px;margin:14px 16px 4px;
+.hbanner{display:flex;align-items:center;gap:14px;margin:14px 22px 2px;
   padding:14px 16px;background:#fdf6e3;border:1px solid #f5e3b3;border-radius:14px}
 .hicon{flex:0 0 40px;height:40px;border-radius:11px;background:#fff;
   border:1px solid #f0e2bd;display:flex;align-items:center;justify-content:center;
@@ -109,6 +109,10 @@ button,textarea,input{font-family:inherit}
 .claimbtn{background:#111827;color:#fff;border:none;border-radius:999px;
   padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
 .claimbtn:hover{opacity:.9}
+.reopenrow{display:flex;align-items:center;justify-content:space-between;gap:14px;text-align:left}
+.reopenbtn{background:transparent;border:1px solid var(--rose-border);color:var(--rose);
+  border-radius:8px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.reopenbtn:hover{background:#fff}
 .cbox{display:flex;gap:10px;align-items:flex-end}
 .cbox textarea{flex:1;font-size:14px;resize:none;border:1px solid var(--hair);border-radius:11px;padding:10px 13px;background:var(--sunken);min-height:42px;max-height:120px;outline:none}
 .cbox textarea:focus{border-color:var(--accent-border);background:#fff}
