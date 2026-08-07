@@ -20,6 +20,10 @@ export type Lead = {
   window_open: boolean;
   window_seconds_left: number;
   requisition_sent?: boolean;
+  handoff_waiting?: boolean;
+  handoff_claimed?: boolean;
+  handoff_at?: string | null;
+  handoff_pinged?: string | null;
   paid_paise?: number | null;   // per-lead collected (board sends it when built)
   updated_at: string;
   created_at: string;
@@ -210,6 +214,14 @@ export const sendOriginalAgain = (leadId: string) =>
 export const assignCounsellor = (leadId: string, counsellor: string, staff_name: string) =>
   req(`/api/leads/${leadId}/handoff/assign`,
       { method: "POST", body: JSON.stringify({ counsellor, staff_name }) });
+
+export const claimHandoff = (leadId: string, staff_name: string) =>
+  req(`/api/leads/${leadId}/handoff/claim`,
+      { method: "POST", body: JSON.stringify({ counsellor: staff_name, staff_name }) });
+
+export const reopenChat = (leadId: string, language: string, staff_name: string) =>
+  req(`/api/leads/${leadId}/reopen`,
+      { method: "POST", body: JSON.stringify({ language, staff_name }) });
 
 export const setExpectedVisit = (leadId: string, expected_visit: string) =>
   req(`/api/leads/${leadId}/visit`, { method: "POST", body: JSON.stringify({ expected_visit }) });

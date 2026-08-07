@@ -23,3 +23,7 @@ export function color(id?: string): string {
   const h = [...(id || "x")].reduce((a, c) => a + c.charCodeAt(0), 0);
   return PALETTE[h % PALETTE.length];
 }
+
+// Minutes a family has been waiting for a person, from the handoff timestamp.
+export const waitedMin = (at?: string | null): number =>
+  at ? Math.max(0, Math.round((Date.now() - new Date(at).getTime()) / 60000)) : 0;

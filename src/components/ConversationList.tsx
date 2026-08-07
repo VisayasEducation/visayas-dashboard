@@ -1,6 +1,6 @@
 "use client";
 import { Lead } from "@/lib/api";
-import { timeAgo } from "@/lib/ui";
+import { timeAgo, waitedMin } from "@/lib/ui";
 
 const FILTERS: { key: string | null; label: string }[] = [
   { key: null, label: "All students" },
@@ -65,6 +65,11 @@ export default function ConversationList({
   // redesign v1: the list answers "who acts next". Priority: requisition > human driving.
   // (Flagged-document reason needs a board-endpoint field — deferred to the backend pass.)
   const reason = (l: Lead): string | null => {
+    // A waiting person outranks everything else on this screen.
+    if (l.handoff_waiting)
+      return `Asked for a person — waiting ${waitedMin(l.handoff_at)} min` +
+             (l.handoff_pinged ? ` · pinged` : "");
+    if (l.handoff_claimed) return "You're handling this one";
     if (l.state === "noa" && !l.requisition_sent) return "Requisition ready to send";
     if (l.driven_by === "human") return "You're replying — Maya is paused";
     return null;

@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Lead, TimelineEvent } from "@/lib/api";
+import { Lead, TimelineEvent, claimHandoff, reopenChat } from "@/lib/api";
 import RequisitionBanner from "@/components/RequisitionBanner";
-import { initials, color } from "@/lib/ui";
+import { initials, color, waitedMin } from "@/lib/ui";
 
 // Pull a YouTube video id out of watch?v=, youtu.be/, or /shorts/ URLs.
 function ytId(url: string): string | null {
@@ -244,6 +244,41 @@ export default function ThreadPanel({
       )}
 
       <div className="thread" ref={threadRef} onScroll={handleScroll}>
+        {lead.handoff_waiting && (
+          <div className="hbanner">
+            <div className="hicon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+                   strokeLinejoin="round">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" />
+              </svg>
+            </div>
+            <div className="htext">
+              <div className="htitle">
+                {(lead.name || "This family").split(" ")[0]} asked for a person
+              </div>
+              <div className="hsub">
+                Waiting {waitedMin(lead.handoff_at)} min
+                {lead.handoff_pinged ? ` · ${lead.handoff_pinged} was pinged` : ""}.
+                {" "}Asked to speak to a counsellor.
+              </div>
+            </div>
+            <button
+              className="claimbtn"
+              onClick={async () => {
+                try {
+                  await claimHandoff(lead.id, me);
+                  location.reload();
+                } catch (e) {
+                  alert("Could not claim this chat: " + String(e));
+                }
+              }}
+            >
+              I&apos;ve got this
+            </button>
+          </div>
+        )}
         {rows}
       </div>
 
@@ -255,7 +290,19 @@ export default function ThreadPanel({
           </div>
         ) : !winOpen ? (
           <div className="locked warn">
-            Messaging window closed — an approved template is needed to restart this conversation.
+            Messaging window closed.
+            <button className="claimbtn" onClick={async () => {
+              const ta = confirm("OK for Tanglish, Cancel for English");
+              try {
+                await reopenChat(lead.id, ta ? "tanglish" : "english", me);
+                alert("Reopen message sent. The chat unlocks when they reply.");
+                location.reload();
+              } catch (e) {
+                alert("Could not send it: " + String(e));
+              }
+            }}>
+              Reopen conversation
+            </button>
           </div>
         ) : (
           <div className="cbox">
